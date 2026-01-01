@@ -6,7 +6,8 @@ class RiskEntry {
   String category; // Health, Safety, Finance
   String severity; // Low, Medium, High
   DateTime date;
-
+  DateTime createdAt;
+  int frequency; // how many times user repeated this risk
 
   RiskEntry({
     required this.id,
@@ -15,6 +16,8 @@ class RiskEntry {
     required this.category,
     required this.severity,
     required this.date,
+    required this.createdAt,
+    this.frequency = 1,
   });
 
   Map<String, dynamic> toJson() => {
@@ -24,6 +27,8 @@ class RiskEntry {
     'category': category,
     'severity': severity,
     'date': date.toIso8601String(),
+    'createdAt': createdAt.toIso8601String(),
+    'frequency': frequency,
   };
 
   factory RiskEntry.fromJson(Map<String, dynamic> json) => RiskEntry(
@@ -33,41 +38,7 @@ class RiskEntry {
     category: json['category'],
     severity: json['severity'],
     date: DateTime.parse(json['date']),
-  );
-}
-
-class UserProfile {
-  String name;
-  String email;
-  String avatarUrl;
-  Map<String, int> riskThresholds;
-  List<String> tags;
-  bool isDarkMode;
-
-  UserProfile({
-    required this.name,
-    required this.email,
-    required this.avatarUrl,
-    this.riskThresholds = const {},
-    this.tags = const [],
-    this.isDarkMode = true,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'email': email,
-    'avatarUrl': avatarUrl,
-    'riskThresholds': riskThresholds,
-    'tags': tags,
-    'isDarkMode': isDarkMode,
-  };
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    name: json['name'] ?? 'User',
-    email: json['email'] ?? 'user@gmail.com',
-    avatarUrl: json['avatarUrl'] ?? '',
-    riskThresholds: Map<String, int>.from(json['riskThresholds'] ?? {}),
-    tags: List<String>.from(json['tags'] ?? []),
-    isDarkMode: json['isDarkMode'] ?? true,
+    createdAt: DateTime.parse(json['createdAt']),
+    frequency: json['frequency'] ?? 1,
   );
 }

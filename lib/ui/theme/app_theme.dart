@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Check the theme color again too (I put dark as primary color) if you don't want it you can change
+  // Check the theme color again too (I put dark color as primary color) if you don't want it you can change
   static const Color primaryColor = Color(0xFF1e3a5f);
   static const Color accentColor = Color(0xFF00d4ff);
   static const Color highRiskColor = Color(0xFFef4444);
@@ -10,12 +10,16 @@ class AppTheme {
   static const Color healthColor = Color(0xFF10b981);
   static const Color financeColor = Color(0xFFf59e0b);
   static const Color safetyColor = Color(0xFFef4444);
+  static const Color successColor = Color(0xFF22c55e);
 
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: primaryColor,
     scaffoldBackgroundColor: Color(0xFF0f1419),
-    appBarTheme: AppBarTheme(backgroundColor: primaryColor, elevation: 0),
+    appBarTheme: AppBarTheme(
+      backgroundColor: primaryColor,
+      elevation: 0,
+    ),
     textTheme: TextTheme(
       headlineLarge: TextStyle(
         fontSize: 28,
@@ -36,7 +40,10 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: Color(0xFF0066cc),
     scaffoldBackgroundColor: Color(0xFFF5F5F5),
-    appBarTheme: AppBarTheme(backgroundColor: Color(0xFF0066cc), elevation: 0),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFF0066cc),
+      elevation: 0,
+    ),
     textTheme: TextTheme(
       headlineLarge: TextStyle(
         fontSize: 28,

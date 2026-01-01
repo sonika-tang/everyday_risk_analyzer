@@ -1,6 +1,6 @@
 import 'package:everyday_risk_analyzer/data/mock_risks.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
-import 'package:everyday_risk_analyzer/ui/screens/add_risk_screen.dart';
+import 'package:everyday_risk_analyzer/models/user.dart';
 import 'package:everyday_risk_analyzer/ui/screens/calendar_screen.dart';
 import 'package:everyday_risk_analyzer/ui/screens/profile_screen.dart';
 import 'package:everyday_risk_analyzer/ui/screens/risk_overview_screen.dart';
@@ -18,39 +18,55 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<RiskEntry>> futureRisks;
+  List<RiskEntry> _risks = [];
+  UserProfile? _profile;
   int selectedIndex = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    futureRisks = StorageService.loadRisks();
+    _loadData();
   }
 
-  void _refreshRisks() {
-    setState(() => futureRisks = StorageService.loadRisks());
+  void _loadData() async {
+    final risks = await StorageService.loadRisks();
+    final profile = await StorageService.loadProfile();
+    setState(() {
+      _risks = risks;
+      _profile = profile;
+      _isLoading = false;
+    });
   }
+
+  // void _onRiskAdded() {
+  //   _loadData();
+  // }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _profile == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-      body: FutureBuilder<List<RiskEntry>>( // Check doc for more about FutureBuilder
-        future: futureRisks,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          List<RiskEntry> risks = snapshot.data!;
-
-          return [
-            WeeklySummaryScreen(risks: risks, onRefresh: _refreshRisks),
-            RiskOverviewScreen(risks: risks), // Still working on
-            CalendarScreen(risks: risks), // Still working on
-            AddRiskScreen(onRiskAdded: _refreshRisks),
-            ProfileScreen(onThemeChange: widget.onThemeChange),
-          ][selectedIndex];
-        },
+      body: AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        child: [
+          WeeklySummaryScreen(
+            key: ValueKey(0),
+            risks: _risks,
+            onRefresh: _loadData,
+          ),
+          RiskOverviewScreen(key: ValueKey(1), risks: _risks),
+          CalendarScreen(key: ValueKey(2), risks: _risks),
+          ProfileScreen(
+            key: ValueKey(3),
+            profile: _profile!,
+            onThemeChange: widget.onThemeChange,
+            onProfileUpdated: _loadData,
+          ),
+        ][selectedIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
@@ -58,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         selectedItemColor: AppTheme.accentColor,
         unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
@@ -67,10 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
-            label: 'Add Risk',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],

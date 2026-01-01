@@ -1,110 +1,238 @@
-import 'package:everyday_risk_analyzer/data/mock_risks.dart';
-import 'package:everyday_risk_analyzer/models/risk.dart';
-import 'package:everyday_risk_analyzer/ui/screens/splash_screen.dart';
-import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
+import 'package:everyday_risk_analyzer/models/user.dart';
+import 'package:everyday_risk_analyzer/ui/widgets/setting_item.dart';
 import 'package:flutter/material.dart';
+import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final UserProfile profile;
   final VoidCallback onThemeChange;
+  final VoidCallback onProfileUpdated;
 
-  const ProfileScreen({super.key, required this.onThemeChange});
+  const ProfileScreen({
+    super.key,
+    required this.profile,
+    required this.onThemeChange,
+    required this.onProfileUpdated,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Future<UserProfile> futureProfile;
+  late UserProfile _currentProfile;
 
   @override
   void initState() {
     super.initState();
-    futureProfile = StorageService.loadProfile();
+    _currentProfile = widget.profile;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<UserProfile>(
-      future: futureProfile,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-
-        UserProfile profile = snapshot.data!;
-
-        return ListView(
-          children: [
-            SizedBox(height: 30),
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor,
-                      border: Border.all(color: AppTheme.accentColor, width: 2),
-                    ),
-                    child: Icon(Icons.person, size: 50, color: AppTheme.accentColor),
-                  ),
-                  SizedBox(height: 16),
-                  Text(profile.name, style: Theme.of(context).textTheme.headlineMedium),
-                  Text(profile.email, style: Theme.of(context).textTheme.bodySmall),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).brightness == Brightness.dark
-                          ? Color(0xFF1a2332)
-                          : Color(0xFFe3f2fd),
-                    ),
-                    child: Text('Edit Profile'),
-                  ),
-                ],
-              ),
+    return ListView(
+      children: [
+        // Profile Header
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF1a2332)
+                : const Color(0xFFe3f2fd),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
             ),
-            SizedBox(height: 30),
-            _buildSettingItem(Icons.person, 'Account Settings', () {}),
-            _buildSettingItem(Icons.security, 'Privacy & Security', () {}),
-            _buildSettingItem(Icons.notifications, 'Notifications', () {}),
-            ListTile(
-              leading: Icon(Icons.palette, color: Colors.grey),
-              title: Text('Appearance'),
-              trailing: Switch(
-                value: profile.isDarkMode,
-                onChanged: (value) async {
-                  profile.isDarkMode = value;
-                  await StorageService.saveProfile(profile);
-                  widget.onThemeChange();
+          ),
+          child: Column(
+            children: [
+              // Avatar
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).primaryColor,
+                  border: Border.all(color: AppTheme.accentColor, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.accentColor.withValues(alpha: .3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                  color: AppTheme.accentColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Name
+              Text(
+                _currentProfile.name,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              // Email
+              Text(
+                _currentProfile.email,
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+
+              // Member Since
+              Text(
+                'Member since ${_currentProfile.createdAt.day}/${_currentProfile.createdAt.month}/${_currentProfile.createdAt.year}',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 20),
+
+              // Edit Profile Button
+              ElevatedButton.icon(
+                onPressed: () => () {
+                  _showSnackBar("Edit profile comming soon!");
                 },
-                activeThumbColor: AppTheme.accentColor,
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accentColor,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 30),
+
+        // Settings Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'SETTINGS',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.grey[600],
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Account Settings
+        SettingItem(
+          icon: Icons.person,
+          title: 'Account Settings',
+          subtitle: 'Manage your account',
+          onTap: () {
+            _showSnackBar('Account settings coming soon!');
+          },
+        ),
+
+        // Privacy & Security
+        SettingItem(
+          icon: Icons.security,
+          title: 'Privacy & Security',
+          subtitle: 'Control your privacy',
+          onTap: () {
+            _showSnackBar('Privacy settings coming soon!');
+          },
+        ),
+
+        // // Notifications
+        // SettingItem(
+        //   icon: Icons.notifications,
+        //   title: 'Notifications',
+        //   subtitle: 'Manage alerts',
+        //   onTap: () {
+        //     _showSnackBar('Notification settings coming soon!');
+        //   },
+        // ),
+
+        // Appearance / Theme
+        SettingItem(
+          icon: Icons.color_lens,
+          title: 'Appearance',
+          subtitle: 'Toggle light/dark mode',
+          onTap: () {
+            widget.onThemeChange();
+            _showSnackBar('Theme changed!');
+          },
+        ),
+
+        // Language
+        SettingItem(
+          icon: Icons.language,
+          title: 'Language',
+          subtitle: 'English',
+          onTap: () {
+            _showSnackBar('Language settings coming soon!');
+          },
+        ),
+
+        // Help & Support
+        SettingItem(
+          icon: Icons.help,
+          title: 'Help & Support',
+          subtitle: 'Get assistance',
+          onTap: () {
+            _showSnackBar('Help section coming soon!');
+          },
+        ),
+
+        // About
+        SettingItem(
+          icon: Icons.info,
+          title: 'About',
+          subtitle: 'App information',
+          onTap: () {
+            _showSnackBar('About page coming soon!');
+          },
+        ),
+
+        // Sign Out
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: ElevatedButton(
+            onPressed: () {
+              _showSnackBar('Signed out!');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-            _buildSettingItem(Icons.language, 'Language', () {}, trailing: Text('English', style: TextStyle(color: Colors.grey))),
-            _buildSettingItem(Icons.help, 'Help & Support', () {}),
-            _buildSettingItem(Icons.info, 'About', () {}),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SplashScreen(onThemeChange: widget.onThemeChange))),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFef4444)),
-                child: Text('Sign out'),
-              ),
-            ),
-            SizedBox(height: 30),
-          ],
-        );
-      },
+            child: const Text('Sign out'),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildSettingItem(IconData icon, String title, VoidCallback onTap, {Widget? trailing}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey),
-      title: Text(title),
-      trailing: trailing ?? Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: onTap,
-    );
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

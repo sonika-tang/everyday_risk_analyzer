@@ -1,5 +1,5 @@
 import 'package:everyday_risk_analyzer/data/mock_risks.dart';
-import 'package:everyday_risk_analyzer/models/risk.dart';
+import 'package:everyday_risk_analyzer/models/user.dart';
 import 'package:everyday_risk_analyzer/ui/screens/splash_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -16,36 +16,36 @@ class RiskAnalysisApp extends StatefulWidget {
 }
 
 class _RiskAnalysisAppState extends State<RiskAnalysisApp> {
-  late Future<UserProfile> futureProfile;
+  UserProfile? _profile;
+  bool _isLoadingProfile = true;
 
   @override
   void initState() {
     super.initState();
-    futureProfile = StorageService.loadProfile();
+    _loadProfile();
+  }
+
+  void _loadProfile() async {
+    final profile = await StorageService.loadProfile();
+    setState(() {
+      _profile = profile;
+      _isLoadingProfile = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Still research more on FutureBuilder
-    return FutureBuilder<UserProfile>(
-      future: futureProfile,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return MaterialApp(home: Scaffold(body: Center(child: CircularProgressIndicator())));
-        }
+    if (_isLoadingProfile || _profile == null) {
+      return MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
 
-        UserProfile profile = snapshot.data!;
-
-        return MaterialApp(
-          title: 'Risk Analysis',
-          theme: profile.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
-          home: SplashScreen(
-            onThemeChange: () => setState(() {
-              futureProfile = StorageService.loadProfile();
-            }),
-          ),
-        );
-      },
+    return MaterialApp(
+      title: 'Risk Analysis',
+      theme: _profile!.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+      home: SplashScreen(onThemeChange: _loadProfile),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

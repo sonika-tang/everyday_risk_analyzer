@@ -8,89 +8,16 @@ class RiskCard extends StatelessWidget {
 
   const RiskCard({super.key, required this.risk, this.onTap});
 
-  @override
-  Widget build(BuildContext context) {
-    Color severityColor = risk.severity == 'High'
-        ? AppTheme.highRiskColor
-        : risk.severity == 'Medium'
-        ? AppTheme.mediumRiskColor
-        : AppTheme.lowRiskColor;
+  Color _getSeverityColor() {
+    if (risk.severity == 'High') return AppTheme.highRiskColor;
+    if (risk.severity == 'Medium') return AppTheme.mediumRiskColor;
+    return AppTheme.lowRiskColor;
+  }
 
-    IconData icon = risk.category == 'Health'
-        ? Icons.favorite
-        : risk.category == 'Safety'
-        ? Icons.security
-        : Icons.attach_money;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Color(0xFF1a2332)
-              : Color(0xFFe3f2fd),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Color(0xFF0f1419)
-                    : Colors.white,
-              ),
-              child: Icon(icon, color: severityColor, size: 20),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    risk.title,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                  Text(
-                    risk.description,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[400]),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: severityColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    risk.severity,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  _formatDate(risk.date),
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _getCategoryIcon() {
+    if (risk.category == 'Health') return Icons.favorite;
+    if (risk.category == 'Safety') return Icons.security;
+    return Icons.attach_money;
   }
 
   String _formatDate(DateTime date) {
@@ -108,5 +35,81 @@ class RiskCard extends StatelessWidget {
     } else {
       return '${date.month}/${date.day}';
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Color(0xFF1a2332)
+              : Color(0xFFe3f2fd),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: _getSeverityColor().withValues(alpha: .3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _getSeverityColor().withValues(alpha: .2),
+              ),
+              child: Icon(_getCategoryIcon(), color: _getSeverityColor(), size: 22),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    risk.title,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${risk.category} • ${risk.frequency}x',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getSeverityColor(),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    risk.severity,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  _formatDate(risk.date),
+                  style: TextStyle(fontSize: 9, color: Colors.grey),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
