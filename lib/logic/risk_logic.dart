@@ -8,6 +8,16 @@ class RiskLogicEngine {
   static const int HIGH_THRESHOLD = 12;
   static const int MEDIUM_THRESHOLD = 5;
 
+  static List<RiskEntry> filterByMonth(
+    List<RiskEntry> risks,
+    int month,
+    int year,
+  ) {
+    return risks
+        .where((r) => r.date.year == year && r.date.month == month)
+        .toList();
+  }
+
   // Algorithm 1: Risk Severity Escalation based on repetition patterns
   static String evaluateEscalatedSeverity(
     RiskEntry risk,

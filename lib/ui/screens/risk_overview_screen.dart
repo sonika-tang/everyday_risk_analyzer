@@ -6,17 +6,41 @@ import 'package:everyday_risk_analyzer/ui/widgets/default_appbar.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/pie_chart_painter.dart';
 import 'package:flutter/material.dart';
 
-class RiskOverviewScreen extends StatelessWidget {
+class RiskOverviewScreen extends StatefulWidget {
   final List<RiskEntry> risks;
 
   const RiskOverviewScreen({super.key, required this.risks});
 
   @override
+  State<RiskOverviewScreen> createState() => _RiskOverviewScreenState();
+}
+
+class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
+  int selectedMonth = DateTime.now().month;
+  int selectedYear = DateTime.now().year;
+
+  @override
   Widget build(BuildContext context) {
-    String overallRisk = RiskLogicEngine.calculateOverallRisk(risks);
-    var healthCat = RiskLogicEngine.calculateCategorySummary(risks, 'Health');
-    var safetyCat = RiskLogicEngine.calculateCategorySummary(risks, 'Safety');
-    var financeCat = RiskLogicEngine.calculateCategorySummary(risks, 'Finance');
+    final monthlyRisk = RiskLogicEngine.filterByMonth(
+      widget.risks,
+      selectedMonth,
+      selectedYear,
+    );
+
+    String overallRisk = RiskLogicEngine.calculateOverallRisk(monthlyRisk);
+
+    var healthCat = RiskLogicEngine.calculateCategorySummary(
+      monthlyRisk,
+      'Health',
+    );
+    var safetyCat = RiskLogicEngine.calculateCategorySummary(
+      monthlyRisk,
+      'Safety',
+    );
+    var financeCat = RiskLogicEngine.calculateCategorySummary(
+      monthlyRisk,
+      'Finance',
+    );
 
     int healthTotal =
         (healthCat['high'] ?? 0) +
@@ -60,6 +84,8 @@ class RiskOverviewScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineLarge,
           ),
           SizedBox(height: 20),
+          _buildMonthSelector(),
+          SizedBox(height: 20),
           // Overall Risk Score Card
           Container(
             padding: EdgeInsets.all(24),
@@ -86,42 +112,6 @@ class RiskOverviewScreen extends StatelessWidget {
                     financePercent: financePercent,
                   ),
                 ),
-                // SizedBox(height: 20),
-                // // Central Circle with Score
-                // Container(
-                //   width: 140,
-                //   height: 140,
-                //   decoration: BoxDecoration(
-                //     shape: BoxShape.circle,
-                //     color: Theme.of(context).brightness == Brightness.dark
-                //         ? Color(0xFF0f1419)
-                //         : Colors.white,
-                //     border: Border.all(color: overallColor, width: 3),
-                //   ),
-                //   child: Center(
-                //     child: Column(
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       children: [
-                //         Text(
-                //           score.toStringAsFixed(0),
-                //           style: TextStyle(
-                //             fontSize: 40,
-                //             fontWeight: FontWeight.bold,
-                //             color: overallColor,
-                //           ),
-                //         ),
-                //         Text(
-                //           overallRisk,
-                //           style: TextStyle(
-                //             fontSize: 14,
-                //             fontWeight: FontWeight.bold,
-                //             color: overallColor,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
                 SizedBox(height: 20),
                 Text(
                   'Total Risks: ${healthTotal + safetyTotal + financeTotal}',
@@ -181,4 +171,74 @@ class RiskOverviewScreen extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildMonthSelector() {
+    final months = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
+    ];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(12, (index) {
+        final isSelected = selectedMonth == index + 1;
+
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedMonth = index + 1;
+            });
+          },
+          child: Text(
+            months[index],
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
 }
+
+                // SizedBox(height: 20),
+                // // Central Circle with Score
+                // Container(
+                //   width: 140,
+                //   height: 140,
+                //   decoration: BoxDecoration(
+                //     shape: BoxShape.circle,
+                //     color: Theme.of(context).brightness == Brightness.dark
+                //         ? Color(0xFF0f1419)
+                //         : Colors.white,
+                //     border: Border.all(color: overallColor, width: 3),
+                //   ),
+                //   child: Center(
+                //     child: Column(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         Text(
+                //           score.toStringAsFixed(0),
+                //           style: TextStyle(
+                //             fontSize: 40,
+                //             fontWeight: FontWeight.bold,
+                //             color: overallColor,
+                //           ),
+                //         ),
+                //         Text(
+                //           overallRisk,
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             fontWeight: FontWeight.bold,
+                //             color: overallColor,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
