@@ -92,6 +92,16 @@ class StorageService {
         createdAt: now.subtract(Duration(days: 4)),
         frequency: 2,
       ),
+      RiskEntry(
+        id: '6',
+        title: 'Overspending',
+        description: 'Financial risk - Finance',
+        category: 'Finance',
+        severity: 'High',
+        date: now.subtract(Duration(days: 3)),
+        createdAt: now.subtract(Duration(days: 4)),
+        frequency: 2,
+      ),
     ];
   }
 

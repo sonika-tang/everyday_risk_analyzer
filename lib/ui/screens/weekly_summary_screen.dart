@@ -19,6 +19,13 @@ class WeeklySummaryScreen extends StatelessWidget {
     required this.onRefresh,
   });
 
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return "Good Morning";
+    if (hour >= 12 && hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  }
+
   @override
   Widget build(BuildContext context) {
     var summary = RiskLogicEngine.calculateWeeklySummary(risks);
@@ -27,133 +34,189 @@ class WeeklySummaryScreen extends StatelessWidget {
     var prediction = RiskLogicEngine.predictNextWeekRisk(risks);
     String recommendation = RiskLogicEngine.getRecommendation(risks);
 
-    return RefreshIndicator(
-      onRefresh: () async => onRefresh(),
-      child: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          SizedBox(height: 20),
-          Text(
-            'Risk Analysis',
-            style: Theme.of(context).textTheme.headlineLarge,
-          ),
-          SizedBox(height: 20),
-          // Weekly Summary Card
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color(0xFF1a2332)
-                  : Color(0xFFe3f2fd),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.accentColor.withValues(alpha: .3),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Row(
+          children: [
+            Text("Hello, ", style: TextStyle(color: Colors.grey.shade300),), 
+            Text(getGreeting(), style: TextStyle(color: Colors.white, fontSize: 30),)
+          ]
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {}, 
+            icon: Icon(
+              Icons.notifications_active, 
+              color: Colors.white,
             ),
-            child: Column(
+            padding: EdgeInsets.all(16),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async => onRefresh(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              clipBehavior: Clip.none, // allow shadow to overflow
               children: [
-                Text(
-                  'Weekly Summary',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Text(
-                  'Dec 8 - Dec 14, 2025', // Update this later (make it dynamic)
-                  style: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[400]
-                        : Colors.grey[600],
-                    fontSize: 12,
+                // Background color behind AppBar
+                Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)
+                    )
                   ),
                 ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    SummaryBox(
-                      count: '${summary['health'] ?? 0}',
-                      label: 'Health',
-                      color: AppTheme.healthColor,
+
+                // Weekly Summary positioned overlapping the header
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: -60, // controls how much it overlaps (tweak this)
+                  child: Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Color(0xFF1a2332)
+                          : Color(0xFFe3f2fd),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.accentColor.withValues(alpha: .3),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    SummaryBox(
-                      count: '${summary['finance'] ?? 0}',
-                      label: 'Finance',
-                      color: AppTheme.financeColor,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Weekly Summary',
+                            style: Theme.of(context).textTheme.bodyLarge),
+                        Text('Dec 8 - Dec 14, 2025',
+                            style: TextStyle(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
+                              fontSize: 12,
+                            )),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SummaryBox(
+                              count: '${summary['health'] ?? 0}',
+                              label: 'Health',
+                              color: AppTheme.healthColor,
+                            ),
+                            SummaryBox(
+                              count: '${summary['finance'] ?? 0}',
+                              label: 'Finance',
+                              color: AppTheme.financeColor,
+                            ),
+                            SummaryBox(
+                              count: '${summary['safety'] ?? 0}',
+                              label: 'Safety',
+                              color: AppTheme.safetyColor,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    SummaryBox(
-                      count: '${summary['safety'] ?? 0}',
-                      label: 'Safety',
-                      color: AppTheme.safetyColor,
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 16),
-          // Recommendation Card
-          RecommendationCard(
-            recommendation: recommendation,
-            anomalies: patterns['anomalies'] as List<String>,
-            prediction: prediction,
-          ),
-          SizedBox(height: 16),
-          // Alert Box
-          AlertBox(anomalies: patterns['anomalies'] as List<String>),
-          SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+            SizedBox(height: 80),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: RecommendationCard(
+                recommendation: recommendation,
+                anomalies: patterns['anomalies'] as List<String>,
+                prediction: prediction,
+              ),
+            ),
+
+            SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: AlertBox(anomalies: patterns['anomalies'] as List<String>),
+            ),
+
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
                 'Recent Risks (${recent.length})',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              // Icon(Icons.filter_list, color: Colors.grey),
-            ],
-          ),
-          SizedBox(height: 16),
-          if (recent.isEmpty)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(30),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 50,
-                      color: AppTheme.successColor,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'No risks recorded!',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'Great job maintaining a healthy lifestyle.',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            ...recent.map(
-              (risk) => RiskCard(
-                risk: risk,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        RiskDetailScreen(risk: risk, onRiskDeleted: () {}),
-                  ),
-                ),
-              ),
             ),
-          FloatingActionButton(
-            onPressed: AddRiskDialog(onRiskAdded: () => {}, show: () {}).show, // Still fixing
-            shape: CircleBorder(side: BorderSide(width: 2)),
-            child: Icon(Icons.add),
-          ),
-        ],
+
+            SizedBox(height: 12),
+
+            // ✅ Only RiskCards scroll
+            Expanded(
+              child: recent.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(30),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_circle,
+                                size: 50, color: AppTheme.successColor),
+                            SizedBox(height: 10),
+                            Text('No risks recorded!',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            Text('Great job maintaining a healthy lifestyle.',
+                                style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: recent.length,
+                        itemBuilder: (context, index) {
+                          final risk = recent[index];
+                          return RiskCard(
+                            risk: risk,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    RiskDetailScreen(risk: risk, onRiskDeleted: () {}),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ),
+            ),
+          ],
+        ),
+      ),
+      // ✅ FAB stays fixed bottom-right
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (_) => AddRiskDialog(onRiskAdded: onRefresh),
+          );
+        },
+        shape: CircleBorder(side: BorderSide(width: 2)),
+        child: Icon(Icons.add),
       ),
     );
   }

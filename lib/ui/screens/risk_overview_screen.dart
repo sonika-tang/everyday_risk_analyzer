@@ -2,6 +2,7 @@ import 'package:everyday_risk_analyzer/logic/risk_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/category_box.dart';
+import 'package:everyday_risk_analyzer/ui/widgets/default_appbar.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/pie_chart_painter.dart';
 import 'package:flutter/material.dart';
 
@@ -48,108 +49,111 @@ class RiskOverviewScreen extends StatelessWidget {
 
     // double score = RiskLogicEngine.calculateRiskScore(risks);
 
-    return ListView(
-      padding: EdgeInsets.all(16),
-      children: [
-        SizedBox(height: 20),
-        Text(
-          'Risk Analytics',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        SizedBox(height: 20),
-        // Overall Risk Score Card
-        Container(
-          padding: EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Color(0xFF1a2332)
-                : Color(0xFFe3f2fd),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: overallColor.withValues(alpha: .5)),
+    return Scaffold(
+      appBar: DefaultAppBar(),
+      body: ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          SizedBox(height: 5),
+          Text(
+            'Risk Analytics',
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
-          child: Column(
-            children: [
-              Text(
-                'Overall Risk Score',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              SizedBox(height: 30),
-              // Pie Chart
-              CustomPaint(
-                size: Size(200, 200),
-                painter: PieChartPainter(
-                  healthPercent: healthPercent,
-                  safetyPercent: safetyPercent,
-                  financePercent: financePercent,
+          SizedBox(height: 20),
+          // Overall Risk Score Card
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color(0xFF1a2332)
+                  : Color(0xFFe3f2fd),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: overallColor.withValues(alpha: .5)),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Overall Risk Score',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
-              // SizedBox(height: 20),
-              // // Central Circle with Score
-              // Container(
-              //   width: 140,
-              //   height: 140,
-              //   decoration: BoxDecoration(
-              //     shape: BoxShape.circle,
-              //     color: Theme.of(context).brightness == Brightness.dark
-              //         ? Color(0xFF0f1419)
-              //         : Colors.white,
-              //     border: Border.all(color: overallColor, width: 3),
-              //   ),
-              //   child: Center(
-              //     child: Column(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         Text(
-              //           score.toStringAsFixed(0),
-              //           style: TextStyle(
-              //             fontSize: 40,
-              //             fontWeight: FontWeight.bold,
-              //             color: overallColor,
-              //           ),
-              //         ),
-              //         Text(
-              //           overallRisk,
-              //           style: TextStyle(
-              //             fontSize: 14,
-              //             fontWeight: FontWeight.bold,
-              //             color: overallColor,
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              SizedBox(height: 20),
-              Text(
-                'Total Risks: ${healthTotal + safetyTotal + financeTotal}',
-                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-              ),
-              SizedBox(height: 12),
-              _buildLegend(),
-            ],
+                SizedBox(height: 30),
+                // Pie Chart
+                CustomPaint(
+                  size: Size(200, 200),
+                  painter: PieChartPainter(
+                    healthPercent: healthPercent,
+                    safetyPercent: safetyPercent,
+                    financePercent: financePercent,
+                  ),
+                ),
+                // SizedBox(height: 20),
+                // // Central Circle with Score
+                // Container(
+                //   width: 140,
+                //   height: 140,
+                //   decoration: BoxDecoration(
+                //     shape: BoxShape.circle,
+                //     color: Theme.of(context).brightness == Brightness.dark
+                //         ? Color(0xFF0f1419)
+                //         : Colors.white,
+                //     border: Border.all(color: overallColor, width: 3),
+                //   ),
+                //   child: Center(
+                //     child: Column(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         Text(
+                //           score.toStringAsFixed(0),
+                //           style: TextStyle(
+                //             fontSize: 40,
+                //             fontWeight: FontWeight.bold,
+                //             color: overallColor,
+                //           ),
+                //         ),
+                //         Text(
+                //           overallRisk,
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             fontWeight: FontWeight.bold,
+                //             color: overallColor,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                SizedBox(height: 20),
+                Text(
+                  'Total Risks: ${healthTotal + safetyTotal + financeTotal}',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                ),
+                SizedBox(height: 12),
+                _buildLegend(),
+              ],
+            ),
           ),
-        ),
-        SizedBox(height: 20),
-        // Category Boxes
-        CategoryBox(
-          title: 'Health',
-          data: healthCat,
-          color: AppTheme.healthColor,
-        ),
-        SizedBox(height: 16),
-        CategoryBox(
-          title: 'Safety',
-          data: safetyCat,
-          color: AppTheme.safetyColor,
-        ),
-        SizedBox(height: 16),
-        CategoryBox(
-          title: 'Finance',
-          data: financeCat,
-          color: AppTheme.financeColor,
-        ),
-        SizedBox(height: 20),
-      ],
+          SizedBox(height: 20),
+          // Category Boxes
+          CategoryBox(
+            title: 'Health',
+            data: healthCat,
+            color: AppTheme.healthColor,
+          ),
+          SizedBox(height: 16),
+          CategoryBox(
+            title: 'Safety',
+            data: safetyCat,
+            color: AppTheme.safetyColor,
+          ),
+          SizedBox(height: 16),
+          CategoryBox(
+            title: 'Finance',
+            data: financeCat,
+            color: AppTheme.financeColor,
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 

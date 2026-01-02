@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 class AddRiskDialog extends StatefulWidget {
   final VoidCallback onRiskAdded;
 
-  const AddRiskDialog({super.key, required this.onRiskAdded, required Null Function() show});
-
-  VoidCallback? get show => null;
+  //const AddRiskDialog({super.key, required this.onRiskAdded, required Null Function() show});
+  const AddRiskDialog({super.key, required this.onRiskAdded});
+  //VoidCallback? get show => null;
 
   @override
   State<AddRiskDialog> createState() => _AddRiskDialogState();
@@ -41,7 +41,10 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Add New Risk', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Add New Risk',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Icon(Icons.close),
@@ -85,9 +88,13 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getSeverityColor(calculatedSeverity!).withValues(alpha: .1),
+                    color: _getSeverityColor(
+                      calculatedSeverity!,
+                    ).withValues(alpha: .1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: _getSeverityColor(calculatedSeverity!)),
+                    border: Border.all(
+                      color: _getSeverityColor(calculatedSeverity!),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -214,7 +221,9 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
       SnackBar(
         content: Text(message),
         duration: Duration(seconds: 2),
-        backgroundColor: isError ? AppTheme.highRiskColor : AppTheme.successColor,
+        backgroundColor: isError
+            ? AppTheme.highRiskColor
+            : AppTheme.successColor,
       ),
     );
   }

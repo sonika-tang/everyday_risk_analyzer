@@ -2,6 +2,7 @@ import 'package:everyday_risk_analyzer/logic/risk_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/screens/risk_detail_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
+import 'package:everyday_risk_analyzer/ui/widgets/default_appbar.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/risk_card.dart';
 import 'package:flutter/material.dart';
 
@@ -33,62 +34,65 @@ class _CalendarScreenState extends State<CalendarScreen> {
             r.date.month == currentMonth.month)
         .toList();
 
-    return ListView(
-      padding: EdgeInsets.all(16),
-      children: [
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: Icon(Icons.chevron_left),
-              onPressed: () => setState(() =>
-                  currentMonth = DateTime(currentMonth.year, currentMonth.month - 1)),
-            ),
-            Text(
-              '${_monthName(currentMonth.month)} ${currentMonth.year}',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            IconButton(
-              icon: Icon(Icons.chevron_right),
-              onPressed: () => setState(() =>
-                  currentMonth = DateTime(currentMonth.year, currentMonth.month + 1)),
-            ),
-          ],
-        ),
-        SizedBox(height: 16),
-        _buildCalendar(),
-        SizedBox(height: 30),
-        Text(
-          "Risks for ${_monthName(currentMonth.month)} (${monthRisks.length})",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        SizedBox(height: 16),
-        if (monthRisks.isEmpty)
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Icon(Icons.calendar_today, size: 50, color: Colors.grey),
-                  SizedBox(height: 10),
-                  Text('No risks for this month',
-                      style: Theme.of(context).textTheme.bodyMedium),
-                ],
+    return Scaffold(
+      appBar: DefaultAppBar(),
+      body: ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.chevron_left),
+                onPressed: () => setState(() =>
+                    currentMonth = DateTime(currentMonth.year, currentMonth.month - 1)),
               ),
-            ),
-          )
-        else
-          ...monthRisks.map((risk) => RiskCard(
-                risk: risk,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RiskDetailScreen(risk: risk, onRiskDeleted: () {  },),
-                  ),
+              Text(
+                '${_monthName(currentMonth.month)} ${currentMonth.year}',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed: () => setState(() =>
+                    currentMonth = DateTime(currentMonth.year, currentMonth.month + 1)),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          _buildCalendar(),
+          SizedBox(height: 30),
+          Text(
+            "Risks for ${_monthName(currentMonth.month)} (${monthRisks.length})",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          SizedBox(height: 16),
+          if (monthRisks.isEmpty)
+            Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Icon(Icons.calendar_today, size: 50, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text('No risks for this month',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                  ],
                 ),
-              )),
-      ],
+              ),
+            )
+          else
+            ...monthRisks.map((risk) => RiskCard(
+                  risk: risk,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RiskDetailScreen(risk: risk, onRiskDeleted: () {  },),
+                    ),
+                  ),
+                )),
+        ],
+      ),
     );
   }
 

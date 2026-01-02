@@ -12,7 +12,7 @@ class UserProfile {
     required this.name,
     required this.email,
     required this.createdAt,
-    this.isDarkMode = true,
+    this.isDarkMode = false,
     this.preferences = const {},
   });
 
