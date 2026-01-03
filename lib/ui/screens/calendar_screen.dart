@@ -39,12 +39,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         )
         .toList();
 
-    final now = DateTime(
-      currentMonth.year,
-      currentMonth.month,
-      currentMonth.day,
-    );
-
     DateTime startOfWeek = currentMonth.subtract(Duration(days: currentMonth.weekday - 1));
     DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
