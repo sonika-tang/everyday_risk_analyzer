@@ -83,7 +83,7 @@ class PieChartPainter extends CustomPainter {
     final radius = size.width / 2;
 
     final strokeWidth = 20.0; // thickness of donut ring
-    final gapAngle = 0.28;    // radians (~3 degrees) gap between segments
+    final gapAngle = 0.28; // radians (~3 degrees) gap between segments
 
     final healthPaint = Paint()
       ..color = AppTheme.healthColor
@@ -146,25 +146,32 @@ class PieChartPainter extends CustomPainter {
     // Blank hole in the middle
     final holeRadius = radius - strokeWidth / 2;
     final holePaint = Paint()..color = Colors.transparent;
+    final total = healthPercent + safetyPercent + financePercent;
     canvas.drawCircle(center, holeRadius, holePaint);
 
-    // Determine dominant category
     String label;
     double value;
-    if (healthPercent >= safetyPercent && healthPercent >= financePercent) {
-      label = 'Health';
-      value = healthPercent;
-    } else if (safetyPercent >= financePercent) {
-      label = 'Safety';
-      value = safetyPercent;
-    } else {
-      label = 'Finance';
-      value = financePercent;
+
+    if (total == 0) {
+      label = 'No Record';
+      value = 0;
+    } else{
+      final Map<String, double> values = {
+        'Health': healthPercent,
+        'Safety': safetyPercent,
+        'Finance': financePercent,
+      };
+      final dominant = values.entries.reduce((a, b) => a.value > b.value ? a : b);
+
+      label = dominant.key;
+      value = dominant.value;
     }
 
     // Center text
     final textSpan = TextSpan(
-      text: '$label\n${value.toStringAsFixed(1)}%',
+      text: label == 'No Record'
+          ? 'No Record'
+          : '$label\n${value.toStringAsFixed(1)}%',
       style: TextStyle(
         color: Colors.black87,
         fontSize: 18,
@@ -180,7 +187,8 @@ class PieChartPainter extends CustomPainter {
     );
 
     textPainter.layout();
-    final offset = center - Offset(textPainter.width / 2, textPainter.height / 2);
+    final offset =
+        center - Offset(textPainter.width / 2, textPainter.height / 2);
     textPainter.paint(canvas, offset);
   }
 

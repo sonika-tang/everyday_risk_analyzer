@@ -118,7 +118,7 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
                   style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                 ),
                 SizedBox(height: 12),
-                _buildLegend(),
+                _buildLegend(healthPercent, safetyPercent, financePercent),
               ],
             ),
           ),
@@ -128,18 +128,21 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
             title: 'Health',
             data: healthCat,
             color: AppTheme.healthColor,
+            risks: monthlyRisk,
           ),
           SizedBox(height: 16),
           CategoryBox(
             title: 'Safety',
             data: safetyCat,
             color: AppTheme.safetyColor,
+            risks: monthlyRisk,
           ),
           SizedBox(height: 16),
           CategoryBox(
             title: 'Finance',
             data: financeCat,
-            color: AppTheme.financeColor,
+            color: AppTheme.financeColor, 
+            risks: monthlyRisk,
           ),
           SizedBox(height: 20),
         ],
@@ -147,18 +150,22 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(
+    double healthPercent,
+    double safetyPercent,
+    double financePercent,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildLegendItem('Health', AppTheme.healthColor),
-        _buildLegendItem('Safety', AppTheme.safetyColor),
-        _buildLegendItem('Finance', AppTheme.financeColor),
+        _buildLegendItem('Health', healthPercent, AppTheme.healthColor),
+        _buildLegendItem('Safety', safetyPercent, AppTheme.safetyColor),
+        _buildLegendItem('Finance', financePercent, AppTheme.financeColor),
       ],
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildLegendItem(String label, double percentage, Color color) {
     return Row(
       children: [
         Container(
@@ -167,7 +174,7 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         SizedBox(width: 6),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey)),
+        Text('$label (${percentage.toStringAsFixed(1)}%)', style: TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
@@ -178,67 +185,51 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
       'Jul','Aug','Sep','Oct','Nov','Dec'
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(12, (index) {
-        final isSelected = selectedMonth == index + 1;
+    return SizedBox(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: months.length,
+        itemBuilder: (context, index) {
+          final isSelected = selectedMonth == index + 1;
 
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedMonth = index + 1;
-            });
-          },
-          child: Text(
-            months[index],
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey,
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedMonth = index + 1;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    months[index],
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: 2,
+                    width: isSelected ? 20 : 0,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 
 }
-
-                // SizedBox(height: 20),
-                // // Central Circle with Score
-                // Container(
-                //   width: 140,
-                //   height: 140,
-                //   decoration: BoxDecoration(
-                //     shape: BoxShape.circle,
-                //     color: Theme.of(context).brightness == Brightness.dark
-                //         ? Color(0xFF0f1419)
-                //         : Colors.white,
-                //     border: Border.all(color: overallColor, width: 3),
-                //   ),
-                //   child: Center(
-                //     child: Column(
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       children: [
-                //         Text(
-                //           score.toStringAsFixed(0),
-                //           style: TextStyle(
-                //             fontSize: 40,
-                //             fontWeight: FontWeight.bold,
-                //             color: overallColor,
-                //           ),
-                //         ),
-                //         Text(
-                //           overallRisk,
-                //           style: TextStyle(
-                //             fontSize: 14,
-                //             fontWeight: FontWeight.bold,
-                //             color: overallColor,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),

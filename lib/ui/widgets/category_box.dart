@@ -1,4 +1,7 @@
+import 'package:everyday_risk_analyzer/models/risk.dart';
+import 'package:everyday_risk_analyzer/ui/screens/risk_detail_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
+import 'package:everyday_risk_analyzer/ui/widgets/risk_card.dart';
 import 'package:flutter/material.dart';
 
 class CategoryBox extends StatelessWidget {
@@ -6,11 +9,70 @@ class CategoryBox extends StatelessWidget {
   final Map<String, int> data;
   final Color color;
 
-  const CategoryBox({super.key, 
+  final List<RiskEntry> risks;
+
+  const CategoryBox({
+    super.key,
     required this.title,
     required this.data,
     required this.color,
+    required this.risks,
   });
+
+  void _showMonthCategoryRisks(BuildContext context) {
+    final categoryRisks = risks
+        .where((risk) => risk.category == title)
+        .toList();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$title Risks',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
+
+            if (categoryRisks.isEmpty)
+              const Center(
+                child: Text(
+                  'No risks recorded for this category',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            else
+            Expanded(
+              child: ListView(
+                children: categoryRisks
+                    .map(
+                      (risk) => RiskCard(
+                        risk: risk,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RiskDetailScreen(
+                              risk: risk,
+                              onRiskDeleted: () {},
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +91,15 @@ class CategoryBox extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: Theme.of(context).textTheme.bodyLarge),
-              Text('Details',
-                  style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+              GestureDetector(
+                onTap: () {
+                  _showMonthCategoryRisks(context);
+                },
+                child: Text(
+                  'Details >>',
+                  style: TextStyle(color: color, fontSize: 12),
+                ),
+              ),
             ],
           ),
           SizedBox(height: 12),
@@ -38,12 +107,20 @@ class CategoryBox extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _RiskCountWidget(
-                  count: '${data['high'] ?? 0}', label: 'High', color: AppTheme.highRiskColor),
+                count: '${data['high'] ?? 0}',
+                label: 'High',
+                color: AppTheme.highRiskColor,
+              ),
               _RiskCountWidget(
-                  count: '${data['medium'] ?? 0}',
-                  label: 'Medium',
-                  color: AppTheme.mediumRiskColor),
-              _RiskCountWidget(count: '${data['low'] ?? 0}', label: 'Low', color: AppTheme.lowRiskColor),
+                count: '${data['medium'] ?? 0}',
+                label: 'Medium',
+                color: AppTheme.mediumRiskColor,
+              ),
+              _RiskCountWidget(
+                count: '${data['low'] ?? 0}',
+                label: 'Low',
+                color: AppTheme.lowRiskColor,
+              ),
             ],
           ),
         ],
@@ -69,7 +146,11 @@ class _RiskCountWidget extends StatelessWidget {
       children: [
         Text(
           count,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
         Text(label, style: TextStyle(fontSize: 10, color: Colors.grey)),
       ],
