@@ -136,6 +136,19 @@ static List<RiskEntry> _getDefaultMockRisks() {
       urgency: 'Emergency',
       controlLevel: 'Unavoidable',
     ),
+    RiskEntry(
+      id: '8',
+      title: 'Impulse shopping',
+      description: 'Bought unnecessary items',
+      category: 'Finance',
+      severity: 'Medium',
+      date: DateTime.now(),
+      createdAt: DateTime.now(),
+      frequency: 1,
+      reason: 'Careless',
+      urgency: 'Calm',
+      controlLevel: 'Fully Avoidable',
+    ),
   ];
 }
 

@@ -29,9 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadData();
   }
 
-  void _loadData() async {
+  Future<void> _loadData() async {
     final risks = await StorageService.loadRisks();
     final profile = await StorageService.loadProfile();
+
+    if (!mounted) return;
+
     setState(() {
       _risks = risks;
       _profile = profile;
@@ -39,9 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // void _onRiskAdded() {
-  //   _loadData();
-  // }
+
+  void _onRiskAdded() {
+    _loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           WeeklySummaryScreen(
             key: ValueKey(0),
             risks: _risks,
-            onRefresh: _loadData,
+            onRefresh: _onRiskAdded,
           ),
           RiskOverviewScreen(key: ValueKey(1), risks: _risks),
           CalendarScreen(key: ValueKey(2), risks: _risks),
@@ -70,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
-        onTap: (index) => setState(() => selectedIndex = index),
+        onTap: (index) async {
+          setState(() => selectedIndex = index);
+          await _loadData(); // force refresh
+        },
         backgroundColor: Theme.of(context).primaryColor,
         selectedItemColor: AppTheme.accentColor,
         unselectedItemColor: Colors.grey,

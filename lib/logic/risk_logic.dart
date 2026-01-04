@@ -192,85 +192,89 @@ class RiskLogicEngine {
     return (totalScore / risks.length).clamp(0, 100);
   }
 
-  // // Algorithm 4: Predictive modeling - forecast next week's risk level
-  // static Map<String, dynamic> predictNextWeekRisk(List<RiskEntry> risks) {
-  //   DateTime now = DateTime.now();
-  //   DateTime lastWeekStart = now.subtract(Duration(days: 7));
-
-  //   int lastWeekRisks = risks
-  //       .where((r) => r.date.isAfter(lastWeekStart) && r.date.isBefore(now))
-  //       .length;
-
-  //   // Trend analysis: predict based on pattern
-  //   int predictedRisks = (lastWeekRisks * 1.15)
-  //       .toInt(); // 15% increase prediction
-
-  //   String prediction = 'Based on last week: ~$predictedRisks risks expected';
-  //   if (lastWeekRisks > CRITICAL_THRESHOLD) {
-  //     prediction += ' - CRITICAL!';
-  //   } else if (lastWeekRisks > HIGH_THRESHOLD) {
-  //     prediction += ' - HIGH!';
-  //   }
-
-  //   return {
-  //     'lastWeekCount': lastWeekRisks,
-  //     'predictedCount': predictedRisks,
-  //     'prediction': prediction,
-  //     'confidence': 0.78,
-  //   };
-  // }
-
-  // // Algorithm 5: Get customized recommendation based on risk profile
-  // static String getRecommendation(List<RiskEntry> risks) {
-  //   double score = calculateRiskScore(risks);
-  //   var patterns = detectBehavioralPatterns(risks);
-  //   var weeklyTotal = calculateWeeklySummary(risks);
-  //   int total =
-  //       (weeklyTotal['health'] ?? 0) +
-  //       (weeklyTotal['finance'] ?? 0) +
-  //       (weeklyTotal['safety'] ?? 0);
-
-  //   if (score >= 80) {
-  //     return 'CRITICAL: You have taken way too many high-risk behaviors. Immediate action required to reduce risks.';
-  //   } else if (score >= 60) {
-  //     return 'SEVERE: Your risk level is dangerously high (${score.toStringAsFixed(0)}/100). Reduce risky behaviors now.';
-  //   } else if (score >= 40) {
-  //     return 'HIGH: Multiple risk patterns detected. ${(patterns['anomalies'] as List).length} concern(s) identified. Reduce activities.';
-  //   } else if (score >= 25) {
-  //     return 'MODERATE: You have $total risks this week. Stay vigilant and reduce exposure.';
-  //   } else if (score > 0) {
-  //     return 'GOOD: ${total > 0 ? "You have $total risks but managing well" : "You are maintaining a healthy lifestyle"}. Keep it up!';
-  //   } else {
-  //     return 'EXCELLENT: No risks recorded! Maintain this healthy lifestyle.';
-  //   }
-  // }
-
-  // Weekly summary
-  static Map<String, int> calculateWeeklySummary(List<RiskEntry> risks) {
+  // Algorithm 4: Compare last week vs this week risk frequencies
+  static Map<String, dynamic> compareCategoryFrequencies(List<RiskEntry> risks) {
     DateTime now = DateTime.now();
-    DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
 
-    int healthCount = 0;
-    int financeCount = 0;
-    int safetyCount = 0;
+    // --- Define week boundaries ---
+    DateTime thisWeekStart = now.subtract(Duration(days: now.weekday - 1));
+    DateTime thisWeekEnd = thisWeekStart.add(const Duration(days: 6));
 
-    for (var risk in risks) {
-      if (risk.date.isAfter(weekStart) &&
-          risk.date.isBefore(now.add(Duration(days: 1)))) {
-        if (risk.category == 'Health') {
-          healthCount++;
-        } else if (risk.category == 'Finance') {
-          financeCount++;
-        } else if (risk.category == 'Safety') {
-          safetyCount++;
-        }
+    DateTime lastWeekStart = thisWeekStart.subtract(const Duration(days: 7));
+    DateTime lastWeekEnd = thisWeekStart.subtract(const Duration(days: 1));
+
+    // --- Separate risks ---
+    List<RiskEntry> thisWeekRisks = risks.where((r) =>
+      r.date.isAfter(thisWeekStart.subtract(const Duration(seconds: 1))) &&
+      r.date.isBefore(thisWeekEnd.add(const Duration(days: 1)))
+    ).toList();
+
+    List<RiskEntry> lastWeekRisks = risks.where((r) =>
+      r.date.isAfter(lastWeekStart.subtract(const Duration(seconds: 1))) &&
+      r.date.isBefore(lastWeekEnd.add(const Duration(days: 1)))
+    ).toList();
+
+    // --- Count by category ---
+    Map<String, int> thisWeekCounts = {
+      'Health': thisWeekRisks.where((r) => r.category == 'Health').length,
+      'Safety': thisWeekRisks.where((r) => r.category == 'Safety').length,
+      'Finance': thisWeekRisks.where((r) => r.category == 'Finance').length,
+    };
+
+    Map<String, int> lastWeekCounts = {
+      'Health': lastWeekRisks.where((r) => r.category == 'Health').length,
+      'Safety': lastWeekRisks.where((r) => r.category == 'Safety').length,
+      'Finance': lastWeekRisks.where((r) => r.category == 'Finance').length,
+    };
+
+    // --- Build comparison ---
+    Map<String, String> comparison = {};
+    for (var category in ['Health', 'Safety', 'Finance']) {
+      int last = lastWeekCounts[category] ?? 0;
+      int current = thisWeekCounts[category] ?? 0;
+      int diff = current - last;
+
+      if (diff > 0) {
+        comparison[category] = '↑ Increased by $diff (from $last to $current)';
+      } else if (diff < 0) {
+        comparison[category] = '↓ Decreased by ${diff.abs()} (from $last to $current)';
+      } else {
+        comparison[category] = '→ No change ($current)';
       }
     }
 
     return {
-      'health': healthCount,
-      'finance': financeCount,
-      'safety': safetyCount,
+      'lastWeek': lastWeekCounts,
+      'thisWeek': thisWeekCounts,
+      'comparison': comparison,
+    };
+  }
+
+
+  // Weekly summary
+  static Map<String, int> calculateWeeklySummary(
+    List<RiskEntry> risks,
+    DateTime weekStart,
+  ) {
+    final weekEnd = weekStart.add(Duration(days: 6));
+
+    int health = 0;
+    int finance = 0;
+    int safety = 0;
+
+    for (var risk in risks) {
+      if (!risk.date.isBefore(weekStart) &&
+          !risk.date.isAfter(weekEnd)) {
+        if (risk.category == 'Health') health++;
+        if (risk.category == 'Finance') finance++;
+        if (risk.category == 'Safety') safety++;
+      }
+    }
+
+    return {
+      'health': health,
+      'finance': finance,
+      'safety': safety,
     };
   }
 

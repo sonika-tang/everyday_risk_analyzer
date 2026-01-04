@@ -4,10 +4,11 @@ import 'package:everyday_risk_analyzer/ui/screens/add_risk_screen.dart';
 import 'package:everyday_risk_analyzer/ui/screens/risk_detail_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/risk_card.dart';
+import 'package:everyday_risk_analyzer/ui/widgets/risk_comparison.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/summary_box.dart';
 import 'package:flutter/material.dart';
 
-class WeeklySummaryScreen extends StatelessWidget {
+class WeeklySummaryScreen extends StatefulWidget {
   final List<RiskEntry> risks;
   final VoidCallback onRefresh;
 
@@ -17,6 +18,15 @@ class WeeklySummaryScreen extends StatelessWidget {
     required this.onRefresh,
   });
 
+  @override
+  State<WeeklySummaryScreen> createState() => _WeeklySummaryScreenState();
+}
+
+class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
+  DateTime getWeekStart(DateTime date) {return date.subtract(Duration(days: date.weekday - 1));}
+  DateTime getWeekEnd(DateTime date) {return getWeekStart(date).add(Duration(days: 6));}
+  DateTime selectedWeek = DateTime.now();
+
   String getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return "Good Morning";
@@ -24,10 +34,27 @@ class WeeklySummaryScreen extends StatelessWidget {
     return "Good Evening";
   }
 
+  String formatDate(DateTime date) {
+    const months = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
+    ];
+    return '${date.day} ${months[date.month - 1]}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    selectedWeek = DateTime.now();
+  }
+
   @override
   Widget build(BuildContext context) {
-    var summary = RiskLogicEngine.calculateWeeklySummary(risks);
-    var recent = RiskLogicEngine.getRecentRisks(risks, days: 7);
+    var recent = RiskLogicEngine.getRecentRisks(widget.risks, days: 7);
+    var comparison = RiskLogicEngine.compareCategoryFrequencies(widget.risks);
+    final weekStart = getWeekStart(selectedWeek);
+    final weekEnd = getWeekEnd(selectedWeek);
+    final summary = RiskLogicEngine.calculateWeeklySummary(widget.risks, weekStart);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +77,7 @@ class WeeklySummaryScreen extends StatelessWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => onRefresh(),
+        onRefresh: () async => widget.onRefresh(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -100,10 +127,9 @@ class WeeklySummaryScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         Text(
-                          'Dec 8 - Dec 14, 2025',
+                          '${formatDate(weekStart)} - ${formatDate(weekEnd)}',
                           style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
+                            color: Theme.of(context).brightness == Brightness.dark
                                 ? Colors.grey[400]
                                 : Colors.grey[600],
                             fontSize: 12,
@@ -114,17 +140,17 @@ class WeeklySummaryScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             SummaryBox(
-                              count: '${summary['health'] ?? 0}',
+                              count: '${summary['Health'] ?? 0}',
                               label: 'Health',
                               color: AppTheme.healthColor,
                             ),
                             SummaryBox(
-                              count: '${summary['finance'] ?? 0}',
+                              count: '${summary['Finance'] ?? 0}',
                               label: 'Finance',
                               color: AppTheme.financeColor,
                             ),
                             SummaryBox(
-                              count: '${summary['safety'] ?? 0}',
+                              count: '${summary['Safety'] ?? 0}',
                               label: 'Safety',
                               color: AppTheme.safetyColor,
                             ),
@@ -137,6 +163,13 @@ class WeeklySummaryScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 80),
+            Padding( 
+              padding: const EdgeInsets.symmetric(horizontal: 16), 
+              child: RiskComparisonCard( 
+                headLine: 'Weekly category comparison', 
+                comparison: comparison, 
+              ), 
+            ),
             SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -210,7 +243,7 @@ class WeeklySummaryScreen extends StatelessWidget {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (_) => AddRiskDialog(onRiskAdded: onRefresh),
+            builder: (_) => AddRiskDialog(onRiskAdded: widget.onRefresh),
           );
         },
         shape: CircleBorder(),
