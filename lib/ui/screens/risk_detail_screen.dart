@@ -105,7 +105,7 @@ class RiskDetailScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   Text(
                     risk.description.isEmpty ? 'No description provided' : risk.description,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[300]),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                   ),
                 ],
               ),
@@ -117,6 +117,9 @@ class RiskDetailScreen extends StatelessWidget {
             SizedBox(height: 12),
             InfoTile('Date', '${risk.date.day}/${risk.date.month}/${risk.date.year}'),
             InfoTile('Recorded', '${risk.createdAt.day}/${risk.createdAt.month}/${risk.createdAt.year}'),
+            InfoTile('Reason', risk.reason),
+            InfoTile('Urgency', risk.urgency),
+            InfoTile('Control Level', risk.controlLevel),
             InfoTile('Frequency', '${risk.frequency} time${risk.frequency > 1 ? 's' : ''}'),
             InfoTile('Severity', risk.severity),
           ],

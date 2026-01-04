@@ -92,7 +92,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color(0xFF1a2332)
+                  : Color(0xFFe3f2fd),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(

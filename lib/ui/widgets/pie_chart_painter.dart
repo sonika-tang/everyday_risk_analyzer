@@ -173,7 +173,7 @@ class PieChartPainter extends CustomPainter {
           ? 'No Record'
           : '$label\n${value.toStringAsFixed(1)}%',
       style: TextStyle(
-        color: Colors.black87,
+        color: Colors.blue,
         fontSize: 18,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,

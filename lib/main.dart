@@ -33,6 +33,24 @@ class _RiskAnalysisAppState extends State<RiskAnalysisApp> {
     });
   }
 
+  void _toggleTheme() {
+    if (_profile == null) return;
+
+    // Create a new instance with flipped theme
+    final updated = UserProfile(
+      id: _profile!.id,
+      name: _profile!.name,
+      email: _profile!.email,
+      createdAt: _profile!.createdAt,
+      isDarkMode: !_profile!.isDarkMode,
+      // include any other fields your UserProfile has
+    );
+
+    setState(() {
+      _profile = updated;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoadingProfile || _profile == null) {
@@ -41,10 +59,18 @@ class _RiskAnalysisAppState extends State<RiskAnalysisApp> {
       );
     }
 
+    // return MaterialApp(
+    //   title: 'Risk Analysis',
+    //   theme: _profile!.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+    //   home: SplashScreen(onThemeChange: _loadProfile),
+    //   debugShowCheckedModeBanner: false,
+    // );
     return MaterialApp(
       title: 'Risk Analysis',
-      theme: _profile!.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
-      home: SplashScreen(onThemeChange: _loadProfile),
+      theme: AppTheme.lightTheme, 
+      darkTheme: AppTheme.darkTheme, 
+      themeMode: _profile!.isDarkMode ? ThemeMode.dark : ThemeMode.light, 
+      home: SplashScreen(onThemeChange: _toggleTheme),
       debugShowCheckedModeBanner: false,
     );
   }

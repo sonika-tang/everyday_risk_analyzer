@@ -1,4 +1,5 @@
 import 'package:everyday_risk_analyzer/models/user.dart';
+import 'package:everyday_risk_analyzer/ui/screens/splash_screen.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/default_appbar.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/setting_item.dart';
 import 'package:flutter/material.dart';
@@ -196,7 +197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: ElevatedButton(
               onPressed: () {
-                _showSnackBar('Signed out!');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SplashScreen(onThemeChange: widget.onThemeChange),
+                  ),
+                  (route) => false, // remove all previous routes
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
