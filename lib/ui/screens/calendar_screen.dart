@@ -133,6 +133,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ...displayedRisks.map(
             (risk) => RiskCard(
               risk: risk,
+              showWeeklyFrequency: currentView == CalendarView.week, 
+              showMonthlyFrequency: currentView == CalendarView.month,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -261,6 +263,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     .map(
                       (risk) => RiskCard(
                         risk: risk,
+                        showWeeklyFrequency: currentView == CalendarView.week, 
+                        showMonthlyFrequency: currentView == CalendarView.month,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

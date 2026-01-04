@@ -1,59 +1,71 @@
+class SeverityResult {
+  final String label; // "High", "Medium", "Low"
+  final int weight;   // numeric weight for scoring
+
+  const SeverityResult(this.label, this.weight);
+}
+
 class SeverityCalculator {
-  // Auto-calculate severity based on title and description analysis
-  static String calculateSeverity(
+  // Auto-calculate severity based on title, description, category, controlLevel, reason, and urgency
+  static SeverityResult calculateSeverity(
     String title,
     String description,
-    String category,
-  ) {
+    String category, {
+    String controlLevel = '',
+    String urgency = '',
+    String reason = '',
+  }) {
     String combined = ('$title $description').toLowerCase();
     int riskScore = 0;
 
-    // Keywords analysis
-    final highRiskKeywords = [
-      'critical',
-      'severe',
-      'emergency',
-      'accident',
-      'dangerous',
-      'collapsed',
-      'extreme',
-      'serious',
-      'fatal',
-      'broken',
-      'injured',
-      'overdose',
-      'bankruptcy',
-    ];
-
-    final mediumRiskKeywords = [
-      'skipped',
-      'forgot',
-      'missed',
-      'ignored',
-      'avoid',
-      'reckless',
-      'careless',
-      'overspent',
-      'debt',
-      'stress',
-      'anxiety',
-      'tired',
-      'dehydration',
-      'weak',
-    ];
-
-    // Check high risk keywords
-    for (var keyword in highRiskKeywords) {
-      if (combined.contains(keyword)) {
-        riskScore += 3;
+    // ControlLevel weighting
+    int controlWeight(String controlLevel) {
+      switch (controlLevel) {
+        case 'Fully Avoidable': return 3;
+        case 'Partially': return 2;
+        case 'Unavoidable': return 1;
+        default: return 0;
       }
     }
 
-    // Check medium risk keywords
-    for (var keyword in mediumRiskKeywords) {
-      if (combined.contains(keyword)) {
-        riskScore += 2;
+    // Urgency weighting
+    int urgencyWeight(String urgency) {
+      switch (urgency) {
+        case 'Emergency': return 3;
+        case 'Rushed': return 2;
+        case 'Calm': return 1;
+        default: return 0;
       }
+    }
+
+    // Reason weighting
+    int reasonWeight(String reason) {
+      final r = reason.toLowerCase();
+      if (r.contains('stress')) return 2;
+      if (r.contains('forgot')) return 1;
+      if (r.contains('financial')) return 2;
+      if (r.contains('careless')) return 2;
+      return 0;
+    }
+
+    // Keywords analysis
+    final highRiskKeywords = [
+      'critical','severe','emergency','accident','dangerous',
+      'collapsed','extreme','serious','fatal','broken',
+      'injured','overdose','bankruptcy',
+    ];
+
+    final mediumRiskKeywords = [
+      'skipped','forgot','missed','ignored','avoid',
+      'reckless','careless','overspent','debt','stress',
+      'anxiety','tired','dehydration','weak',
+    ];
+
+    for (var keyword in highRiskKeywords) {
+      if (combined.contains(keyword)) riskScore += 3;
+    }
+    for (var keyword in mediumRiskKeywords) {
+      if (combined.contains(keyword)) riskScore += 2;
     }
 
     // Category-based scoring
@@ -61,12 +73,20 @@ class SeverityCalculator {
     if (category == 'Safety') riskScore += 2;
     if (category == 'Finance') riskScore += 1;
 
-    // Length consideration - longer descriptions suggest more serious issues
+    // Longer descriptions suggest more serious issues
     if (description.length > 50) riskScore += 3;
 
-    // Determine severity
-    if (riskScore >= 8) return 'High';
-    if (riskScore >= 4) return 'Medium';
-    return 'Low';
+    // Apply controlLevel, urgency, reason
+    riskScore += controlWeight(controlLevel);
+    riskScore += urgencyWeight(urgency);
+    riskScore += reasonWeight(reason);
+
+    // Clamp
+    riskScore = riskScore.clamp(0, 20);
+
+    // Return both label + weight
+    if (riskScore >= 8) return SeverityResult('High', 15);
+    if (riskScore >= 4) return SeverityResult('Medium', 8);
+    return SeverityResult('Low', 3);
   }
 }

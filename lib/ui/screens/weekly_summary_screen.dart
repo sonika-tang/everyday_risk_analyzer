@@ -192,6 +192,7 @@ class WeeklySummaryScreen extends StatelessWidget {
                           final risk = recent[index];
                           return RiskCard(
                             risk: risk,
+                            showWeeklyFrequency: true,
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(

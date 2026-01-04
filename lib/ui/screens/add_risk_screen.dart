@@ -10,9 +10,7 @@ import 'package:flutter/material.dart';
 class AddRiskDialog extends StatefulWidget {
   final VoidCallback onRiskAdded;
 
-  //const AddRiskDialog({super.key, required this.onRiskAdded, required Null Function() show});
   const AddRiskDialog({super.key, required this.onRiskAdded});
-  //VoidCallback? get show => null;
 
   @override
   State<AddRiskDialog> createState() => _AddRiskDialogState();
@@ -21,7 +19,12 @@ class AddRiskDialog extends StatefulWidget {
 class _AddRiskDialogState extends State<AddRiskDialog> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+
   String selectedCategory = 'Health';
+  String selectedReason = 'Stress';
+  String selectedUrgency = 'Calm';
+  String selectedControlLevel = 'Fully Avoidable';
+
   DateTime selectedDate = DateTime.now();
   bool isSubmitting = false;
   String? calculatedSeverity;
@@ -32,7 +35,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,19 +44,19 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Add New Risk',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Icon(Icons.close),
+                    child: const Icon(Icons.close),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // Title Field
+              // Title
               InputField(
                 label: 'Risk Title *',
                 controller: titleController,
@@ -61,9 +64,51 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                 icon: Icons.warning,
                 onChanged: (_) => _updateSeverity(),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-              // Description Field
+              // Reason
+              DropdownButtonFormField<String>(
+                value: selectedReason,
+                items: ['Stress', 'Forgot', 'Financial', 'Careless']
+                    .map((reason) => DropdownMenuItem(
+                          value: reason,
+                          child: Text(reason),
+                        ))
+                    .toList(),
+                onChanged: (val) => setState(() => selectedReason = val!),
+                decoration: const InputDecoration(labelText: 'Reason'),
+              ),
+              const SizedBox(height: 16),
+
+              // Urgency
+              DropdownButtonFormField<String>(
+                value: selectedUrgency,
+                items: ['Emergency', 'Rushed', 'Calm']
+                    .map((urgency) => DropdownMenuItem(
+                          value: urgency,
+                          child: Text(urgency),
+                        ))
+                    .toList(),
+                onChanged: (val) => setState(() => selectedUrgency = val!),
+                decoration: const InputDecoration(labelText: 'Urgency'),
+              ),
+              const SizedBox(height: 16),
+
+              // Control Level
+              DropdownButtonFormField<String>(
+                value: selectedControlLevel,
+                items: ['Fully Avoidable', 'Partially', 'Unavoidable']
+                    .map((level) => DropdownMenuItem(
+                          value: level,
+                          child: Text(level),
+                        ))
+                    .toList(),
+                onChanged: (val) => setState(() => selectedControlLevel = val!),
+                decoration: const InputDecoration(labelText: 'Control Level'),
+              ),
+              const SizedBox(height: 16),
+
+              // Description
               InputField(
                 label: 'Description',
                 controller: descriptionController,
@@ -71,9 +116,9 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                 maxLines: 3,
                 onChanged: (_) => _updateSeverity(),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-              // Category Selector
+              // Category
               CategorySelector(
                 selectedCategory: selectedCategory,
                 onCategoryChanged: (cat) {
@@ -81,16 +126,14 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                   _updateSeverity();
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-              // Calculated Severity Display
+              // Severity Display
               if (calculatedSeverity != null) ...[
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getSeverityColor(
-                      calculatedSeverity!,
-                    ).withValues(alpha: .1),
+                    color: _getSeverityColor(calculatedSeverity!).withValues(alpha: .1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: _getSeverityColor(calculatedSeverity!),
@@ -102,7 +145,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                         _getSeverityIcon(calculatedSeverity!),
                         color: _getSeverityColor(calculatedSeverity!),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Text(
                         'Severity: $calculatedSeverity',
                         style: TextStyle(
@@ -113,15 +156,15 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ],
 
-              // Date Selector
+              // Date
               DateSelector(
                 selectedDate: selectedDate,
                 onDateChanged: (date) => setState(() => selectedDate = date),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Buttons
               Row(
@@ -131,27 +174,27 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[700],
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: Text('Cancel'),
+                      child: const Text('Cancel'),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: isSubmitting ? null : _addRisk,
                       icon: isSubmitting
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Icon(Icons.add),
+                          : const Icon(Icons.add),
                       label: Text(isSubmitting ? 'Adding...' : 'Add Risk'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.accentColor,
                         foregroundColor: Colors.black,
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -167,11 +210,12 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
   void _updateSeverity() {
     setState(() {
       if (titleController.text.isNotEmpty) {
-        calculatedSeverity = SeverityCalculator.calculateSeverity(
+        final severityResult = SeverityCalculator.calculateSeverity(
           titleController.text,
           descriptionController.text,
           selectedCategory,
         );
+        calculatedSeverity = severityResult.label;
       } else {
         calculatedSeverity = null;
       }
@@ -187,7 +231,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
     setState(() => isSubmitting = true);
 
     try {
-      final severity = SeverityCalculator.calculateSeverity(
+      final severityResult = SeverityCalculator.calculateSeverity(
         titleController.text,
         descriptionController.text,
         selectedCategory,
@@ -198,12 +242,16 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
         title: titleController.text.trim(),
         description: descriptionController.text.trim(),
         category: selectedCategory,
-        severity: severity,
+        severity: severityResult.label,
         date: selectedDate,
         createdAt: DateTime.now(),
+        frequency: 1,
+        controlLevel: selectedControlLevel,
+        reason: selectedReason,
+        urgency: selectedUrgency,
       );
 
-      await StorageService.addRisk(newRisk);
+      await StorageService.addRisk(newRisk); // add to mock list
       _showSnackBar('✅ Risk added successfully!', isError: false);
       widget.onRiskAdded();
       Navigator.pop(context);
@@ -220,7 +268,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         backgroundColor: isError
             ? AppTheme.highRiskColor
             : AppTheme.successColor,
