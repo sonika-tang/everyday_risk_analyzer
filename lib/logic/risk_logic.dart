@@ -1,13 +1,12 @@
-// ignore_for_file: constant_identifier_names
 
+
+import 'package:everyday_risk_analyzer/logic/serverity_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
-import 'package:everyday_risk_analyzer/models/risk_statistic.dart';
+import 'package:everyday_risk_analyzer/data/behavior_patterns.dart';
 
 class RiskLogicEngine {
-  static const int CRITICAL_THRESHOLD = 20;
-  static const int HIGH_THRESHOLD = 12;
-  static const int MEDIUM_THRESHOLD = 5;
 
+  // Filter by month
   static List<RiskEntry> filterByMonth(
     List<RiskEntry> risks,
     int month,
@@ -17,32 +16,69 @@ class RiskLogicEngine {
         .where((r) => r.date.year == year && r.date.month == month)
         .toList();
   }
+  
+  static String calculateRiskFor(List<RiskEntry> risks) {
+    if (risks.isEmpty) return 'None';
+
+    Map<String, int> categoryImpact = {
+      'Health': 0,
+      'Finance': 0,
+      'Safety': 0,
+    };
+
+    for (var risk in risks) {
+      final severity = SeverityCalculator.calculateSeverity(
+        risk.title,
+        risk.description,
+        risk.category,
+        controlLevel: risk.controlLevel,
+        urgency: risk.urgency,
+        reason: risk.reason,
+      );
+      categoryImpact[risk.category] =
+          (categoryImpact[risk.category] ?? 0) + severity.weight;
+    }
+
+    return categoryImpact.entries
+        .reduce((a, b) => a.value >= b.value ? a : b)
+        .key;
+  }
 
   // Algorithm 1: Risk Severity Escalation based on repetition patterns
   static String evaluateEscalatedSeverity(
     RiskEntry risk,
     List<RiskEntry> allRisks,
   ) {
-    int similarCount = allRisks
-        .where((r) => r.title.toLowerCase() == risk.title.toLowerCase())
-        .length;
+    // Detect behavior code from title/description
+    String combined = ('${risk.title} ${risk.description}').toLowerCase();
+    String behaviorCode = 'UNCLASSIFIED';
+    for (final pattern in behaviorPatterns) {
+      if (pattern.keywords.any((kw) => combined.contains(kw))) {
+        behaviorCode = pattern.code;
+        break;
+      }
+    }
+
+    // Count similar behaviors instead of exact titles
+    int similarCount = allRisks.where((r) {
+      String text = ('${r.title} ${r.description}').toLowerCase();
+      return behaviorPatterns.any((pattern) =>
+          pattern.code == behaviorCode &&
+          pattern.keywords.any((kw) => text.contains(kw)));
+    }).length;
 
     String baseSeverity = risk.severity;
 
-    // Escalation: repeated behaviors increase severity weight in calculations
-    if (similarCount >= 5) {
-      // High frequency = treat as more severe
-      return 'High';
-    } else if (similarCount >= 3) {
+    if (similarCount >= 5) return 'High';
+    if (similarCount >= 3) {
       if (baseSeverity == 'High') return 'High';
       if (baseSeverity == 'Medium') return 'High';
       return 'Medium';
     }
 
-    // Time-based weighting: recent risks (within 48h) are more severe
+    // Time-based escalation
     DateTime now = DateTime.now();
-    Duration timeSinceRisk = now.difference(risk.date);
-    if (timeSinceRisk.inHours <= 48 && baseSeverity == 'Medium') {
+    if (now.difference(risk.date).inHours <= 48 && baseSeverity == 'Medium') {
       return 'High';
     }
 
@@ -51,7 +87,8 @@ class RiskLogicEngine {
 
   // Algorithm 2: Behavioral pattern recognition - detect clusters and anomalies
   static Map<String, dynamic> detectBehavioralPatterns(List<RiskEntry> risks) {
-    Map<String, int> riskFrequency = {};
+    Map<String, int> weeklyFrequency = {};
+    Map<String, int> monthlyFrequency = {};
     Map<String, List<RiskEntry>> riskClusters = {
       'Health': [],
       'Safety': [],
@@ -59,37 +96,77 @@ class RiskLogicEngine {
     };
     List<String> anomalies = [];
 
-    for (var risk in risks) {
-      riskFrequency[risk.title] = (riskFrequency[risk.title] ?? 0) + 1;
+    DateTime now = DateTime.now();
+
+    // --- Weekly boundaries (current calendar week: Monday–Sunday) ---
+    DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
+    DateTime weekEnd = weekStart.add(const Duration(days: 6));
+
+    // --- Monthly boundaries (current calendar month) ---
+    DateTime monthStart = DateTime(now.year, now.month, 1);
+    DateTime monthEnd = DateTime(now.year, now.month + 1, 1)
+        .subtract(const Duration(seconds: 1));
+
+    // Filter weekly and monthly risks
+    List<RiskEntry> weeklyRisks = risks.where((r) =>
+      r.date.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+      r.date.isBefore(weekEnd.add(const Duration(days: 1)))
+    ).toList();
+
+    List<RiskEntry> monthlyRisks = risks.where((r) =>
+      r.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
+      r.date.isBefore(monthEnd.add(const Duration(seconds: 1)))
+    ).toList();
+
+    // --- Weekly frequency ---
+    for (var risk in weeklyRisks) {
+      String combined = ('${risk.title} ${risk.description}').toLowerCase();
+      String behaviorCode = 'UNCLASSIFIED';
+      for (final pattern in behaviorPatterns) {
+        if (pattern.keywords.any((kw) => combined.contains(kw))) {
+          behaviorCode = pattern.code;
+          break;
+        }
+      }
+      weeklyFrequency[behaviorCode] = (weeklyFrequency[behaviorCode] ?? 0) + 1;
       riskClusters[risk.category]?.add(risk);
     }
 
-    // Anomaly detection: sudden spikes in specific risk types
-    riskFrequency.forEach((title, count) {
-      if (count > 5) {
-        anomalies.add('Repeated: "$title" detected $count times');
+    // --- Monthly frequency ---
+    for (var risk in monthlyRisks) {
+      String combined = ('${risk.title} ${risk.description}').toLowerCase();
+      String behaviorCode = 'UNCLASSIFIED';
+      for (final pattern in behaviorPatterns) {
+        if (pattern.keywords.any((kw) => combined.contains(kw))) {
+          behaviorCode = pattern.code;
+          break;
+        }
       }
+      monthlyFrequency[behaviorCode] = (monthlyFrequency[behaviorCode] ?? 0) + 1;
+    }
+
+    // --- Anomaly detection ---
+    weeklyFrequency.forEach((code, count) {
+      if (count > 5) anomalies.add('Weekly anomaly: $code repeated $count times');
+    });
+    monthlyFrequency.forEach((code, count) {
+      if (count > 10) anomalies.add('Monthly anomaly: $code repeated $count times');
     });
 
-    // Cluster detection: multiple health/safety/finance risks
+    // --- Cluster detection (weekly clusters) ---
     if ((riskClusters['Health']?.length ?? 0) > 3) {
-      anomalies.add(
-        'Health Cluster: ${riskClusters['Health']?.length} health risks',
-      );
+      anomalies.add('Health Cluster: ${riskClusters['Health']?.length} health risks this week');
     }
     if ((riskClusters['Safety']?.length ?? 0) > 3) {
-      anomalies.add(
-        'Safety Cluster: ${riskClusters['Safety']?.length} safety risks',
-      );
+      anomalies.add('Safety Cluster: ${riskClusters['Safety']?.length} safety risks this week');
     }
     if ((riskClusters['Finance']?.length ?? 0) > 3) {
-      anomalies.add(
-        'Finance Cluster: ${riskClusters['Finance']?.length} finance risks',
-      );
+      anomalies.add('Finance Cluster: ${riskClusters['Finance']?.length} finance risks this week');
     }
 
     return {
-      'frequency': riskFrequency,
+      'weeklyFrequency': weeklyFrequency,
+      'monthlyFrequency': monthlyFrequency,
       'clusters': riskClusters,
       'anomalies': anomalies,
     };
@@ -97,70 +174,76 @@ class RiskLogicEngine {
 
   // Algorithm 3: Calculate overall risk score (0-100)
   static double calculateRiskScore(List<RiskEntry> risks) {
-    int high = risks.where((r) => r.severity == 'High').length;
-    int medium = risks.where((r) => r.severity == 'Medium').length;
-    int low = risks.where((r) => r.severity == 'Low').length;
+    if (risks.isEmpty) return 0;
 
-    // Weighted scoring: High=15, Medium=8, Low=3
-    double score = (high * 15) + (medium * 8) + (low * 3);
-    return (score / (risks.length + 1)).clamp(
-      0,
-      100,
-    ); // The result should be between 0-100
-  }
-
-  // Algorithm 4: Predictive modeling - forecast next week's risk level
-  static Map<String, dynamic> predictNextWeekRisk(List<RiskEntry> risks) {
-    DateTime now = DateTime.now();
-    DateTime lastWeekStart = now.subtract(Duration(days: 7));
-
-    int lastWeekRisks = risks
-        .where((r) => r.date.isAfter(lastWeekStart) && r.date.isBefore(now))
-        .length;
-
-    // Trend analysis: predict based on pattern
-    int predictedRisks = (lastWeekRisks * 1.15)
-        .toInt(); // 15% increase prediction
-
-    String prediction = 'Based on last week: ~$predictedRisks risks expected';
-    if (lastWeekRisks > CRITICAL_THRESHOLD) {
-      prediction += ' - CRITICAL!';
-    } else if (lastWeekRisks > HIGH_THRESHOLD) {
-      prediction += ' - HIGH!';
+    double totalScore = 0;
+    for (var risk in risks) {
+      final severity = SeverityCalculator.calculateSeverity(
+        risk.title,
+        risk.description,
+        risk.category,
+        controlLevel: risk.controlLevel,
+        urgency: risk.urgency,
+        reason: risk.reason,
+      );
+      totalScore += severity.weight;
     }
 
-    return {
-      'lastWeekCount': lastWeekRisks,
-      'predictedCount': predictedRisks,
-      'prediction': prediction,
-      'confidence': 0.78,
-    };
+    return (totalScore / risks.length).clamp(0, 100);
   }
 
-  // Algorithm 5: Get customized recommendation based on risk profile
-  static String getRecommendation(List<RiskEntry> risks) {
-    double score = calculateRiskScore(risks);
-    var patterns = detectBehavioralPatterns(risks);
-    var weeklyTotal = calculateWeeklySummary(risks);
-    int total =
-        (weeklyTotal['health'] ?? 0) +
-        (weeklyTotal['finance'] ?? 0) +
-        (weeklyTotal['safety'] ?? 0);
+  // // Algorithm 4: Predictive modeling - forecast next week's risk level
+  // static Map<String, dynamic> predictNextWeekRisk(List<RiskEntry> risks) {
+  //   DateTime now = DateTime.now();
+  //   DateTime lastWeekStart = now.subtract(Duration(days: 7));
 
-    if (score >= 80) {
-      return 'CRITICAL: You have taken way too many high-risk behaviors. Immediate action required to reduce risks.';
-    } else if (score >= 60) {
-      return 'SEVERE: Your risk level is dangerously high (${score.toStringAsFixed(0)}/100). Reduce risky behaviors now.';
-    } else if (score >= 40) {
-      return 'HIGH: Multiple risk patterns detected. ${(patterns['anomalies'] as List).length} concern(s) identified. Reduce activities.';
-    } else if (score >= 25) {
-      return 'MODERATE: You have $total risks this week. Stay vigilant and reduce exposure.';
-    } else if (score > 0) {
-      return 'GOOD: ${total > 0 ? "You have $total risks but managing well" : "You are maintaining a healthy lifestyle"}. Keep it up!';
-    } else {
-      return 'EXCELLENT: No risks recorded! Maintain this healthy lifestyle.';
-    }
-  }
+  //   int lastWeekRisks = risks
+  //       .where((r) => r.date.isAfter(lastWeekStart) && r.date.isBefore(now))
+  //       .length;
+
+  //   // Trend analysis: predict based on pattern
+  //   int predictedRisks = (lastWeekRisks * 1.15)
+  //       .toInt(); // 15% increase prediction
+
+  //   String prediction = 'Based on last week: ~$predictedRisks risks expected';
+  //   if (lastWeekRisks > CRITICAL_THRESHOLD) {
+  //     prediction += ' - CRITICAL!';
+  //   } else if (lastWeekRisks > HIGH_THRESHOLD) {
+  //     prediction += ' - HIGH!';
+  //   }
+
+  //   return {
+  //     'lastWeekCount': lastWeekRisks,
+  //     'predictedCount': predictedRisks,
+  //     'prediction': prediction,
+  //     'confidence': 0.78,
+  //   };
+  // }
+
+  // // Algorithm 5: Get customized recommendation based on risk profile
+  // static String getRecommendation(List<RiskEntry> risks) {
+  //   double score = calculateRiskScore(risks);
+  //   var patterns = detectBehavioralPatterns(risks);
+  //   var weeklyTotal = calculateWeeklySummary(risks);
+  //   int total =
+  //       (weeklyTotal['health'] ?? 0) +
+  //       (weeklyTotal['finance'] ?? 0) +
+  //       (weeklyTotal['safety'] ?? 0);
+
+  //   if (score >= 80) {
+  //     return 'CRITICAL: You have taken way too many high-risk behaviors. Immediate action required to reduce risks.';
+  //   } else if (score >= 60) {
+  //     return 'SEVERE: Your risk level is dangerously high (${score.toStringAsFixed(0)}/100). Reduce risky behaviors now.';
+  //   } else if (score >= 40) {
+  //     return 'HIGH: Multiple risk patterns detected. ${(patterns['anomalies'] as List).length} concern(s) identified. Reduce activities.';
+  //   } else if (score >= 25) {
+  //     return 'MODERATE: You have $total risks this week. Stay vigilant and reduce exposure.';
+  //   } else if (score > 0) {
+  //     return 'GOOD: ${total > 0 ? "You have $total risks but managing well" : "You are maintaining a healthy lifestyle"}. Keep it up!';
+  //   } else {
+  //     return 'EXCELLENT: No risks recorded! Maintain this healthy lifestyle.';
+  //   }
+  // }
 
   // Weekly summary
   static Map<String, int> calculateWeeklySummary(List<RiskEntry> risks) {
@@ -216,7 +299,7 @@ class RiskLogicEngine {
   }
 
   // Get recent risks
-  static List<RiskEntry> getRecentRisks(List<RiskEntry> risks, {int days = 7}) {
+  static List<RiskEntry> getRecentRisks(List<RiskEntry> risks, {int days = 8}) {
     DateTime cutoff = DateTime.now().subtract(Duration(days: days));
     return risks.where((r) => r.date.isAfter(cutoff)).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -242,50 +325,25 @@ class RiskLogicEngine {
         .toList();
   }
 
-  // Generate statistic
-  static RiskStatistics generateStatistics(List<RiskEntry> risks) {
-    var summary = calculateWeeklySummary(risks);
-    int total =
-        (summary['health'] ?? 0) +
-        (summary['finance'] ?? 0) +
-        (summary['safety'] ?? 0);
-    int high = risks.where((r) => r.severity == 'High').length;
-    int medium = risks.where((r) => r.severity == 'Medium').length;
-    int low = risks.where((r) => r.severity == 'Low').length;
+  // Algorithm 6: Monthly and weekly trend analysis
+  int getWeeklyFrequency(RiskEntry risk, List<RiskEntry> allRisks) {
+    DateTime now = DateTime.now();
+    DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
+    DateTime weekEnd = weekStart.add(const Duration(days: 6));
 
-    return RiskStatistics(
-      id: 'stat_${DateTime.now().millisecondsSinceEpoch}',
-      generatedAt: DateTime.now(),
-      totalRisks: total,
-      highRiskCount: high,
-      mediumRiskCount: medium,
-      lowRiskCount: low,
-      risksByCategory: summary.cast<String, int>(),
-      overallRiskScore: calculateRiskScore(risks),
-      recommendation: getRecommendation(risks),
-    );
+    return allRisks.where((r) =>
+      r.date.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+      r.date.isBefore(weekEnd.add(const Duration(days: 1))) &&
+      r.title.toLowerCase() == risk.title.toLowerCase()
+    ).length;
   }
 
-  // Algorithm 6: Monthly trend analysis
-  static Map<String, dynamic> getMonthlyTrend(
-    List<RiskEntry> risks,
-    int month,
-    int year,
-  ) {
-    List<RiskEntry> monthRisks = risks
-        .where((r) => r.date.year == year && r.date.month == month)
-        .toList();
-
-    int high = monthRisks.where((r) => r.severity == 'High').length;
-    int medium = monthRisks.where((r) => r.severity == 'Medium').length;
-    int low = monthRisks.where((r) => r.severity == 'Low').length;
-
-    return {
-      'total': monthRisks.length,
-      'high': high,
-      'medium': medium,
-      'low': low,
-      'avgPerDay': monthRisks.length / 30,
-    };
+  int getMonthlyFrequency(RiskEntry risk, List<RiskEntry> allRisks) {
+    DateTime now = DateTime.now();
+    return allRisks.where((r) =>
+      r.date.year == now.year &&
+      r.date.month == now.month &&
+      r.title.toLowerCase() == risk.title.toLowerCase()
+    ).length;
   }
 }

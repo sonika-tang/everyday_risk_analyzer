@@ -54,6 +54,7 @@ class CategoryBox extends StatelessWidget {
                     .map(
                       (risk) => RiskCard(
                         risk: risk,
+                        showMonthlyFrequency: true,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

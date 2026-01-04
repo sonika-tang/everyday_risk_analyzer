@@ -71,8 +71,6 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
         ? AppTheme.mediumRiskColor
         : AppTheme.lowRiskColor;
 
-    // double score = RiskLogicEngine.calculateRiskScore(risks);
-
     return Scaffold(
       appBar: DefaultAppBar(),
       body: ListView(

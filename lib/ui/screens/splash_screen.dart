@@ -2,7 +2,6 @@ import 'package:everyday_risk_analyzer/ui/screens/home_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
-// Can uppdate this screen later
 class SplashScreen extends StatefulWidget {
   final VoidCallback onThemeChange;
 
@@ -13,7 +12,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;

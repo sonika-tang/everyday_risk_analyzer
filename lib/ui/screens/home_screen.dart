@@ -3,7 +3,7 @@ import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/models/user.dart';
 import 'package:everyday_risk_analyzer/ui/screens/calendar_screen.dart';
 import 'package:everyday_risk_analyzer/ui/screens/profile_screen.dart';
-import 'package:everyday_risk_analyzer/ui/screens/risk_overview_screen.dart';
+import 'package:everyday_risk_analyzer/ui/screens/risk_analytics.dart';
 import 'package:everyday_risk_analyzer/ui/screens/weekly_summary_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';

@@ -4,9 +4,17 @@ import 'package:flutter/material.dart';
 
 class RiskCard extends StatelessWidget {
   final RiskEntry risk;
+  final bool showWeeklyFrequency;
+  final bool showMonthlyFrequency;
   final VoidCallback? onTap;
 
-  const RiskCard({super.key, required this.risk, this.onTap});
+  const RiskCard({
+    super.key,
+    required this.risk,
+    this.showMonthlyFrequency = false,
+    this.showWeeklyFrequency = false,
+    this.onTap,
+  });
 
   Color _getSeverityColor() {
     if (risk.severity == 'High') return AppTheme.highRiskColor;
@@ -39,6 +47,14 @@ class RiskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String frequencyText = risk.category; 
+    if (showWeeklyFrequency) 
+    { 
+      frequencyText += ' • W:${risk.frequency}'; 
+    } 
+    if (showMonthlyFrequency) { 
+      frequencyText += ' • M:${risk.frequency}'; 
+    }
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -49,9 +65,7 @@ class RiskCard extends StatelessWidget {
               ? Color(0xFF1a2332)
               : Color(0xFFe3f2fd),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: _getSeverityColor().withValues(alpha: .3),
-          ),
+          border: Border.all(color: _getSeverityColor().withValues(alpha: .3)),
         ),
         child: Row(
           children: [
@@ -62,7 +76,11 @@ class RiskCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: _getSeverityColor().withValues(alpha: .2),
               ),
-              child: Icon(_getCategoryIcon(), color: _getSeverityColor(), size: 22),
+              child: Icon(
+                _getCategoryIcon(),
+                color: _getSeverityColor(),
+                size: 22,
+              ),
             ),
             SizedBox(width: 12),
             Expanded(
@@ -76,7 +94,7 @@ class RiskCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    '${risk.category} • ${risk.frequency}x',
+                    frequencyText,
                     style: TextStyle(fontSize: 11, color: Colors.grey[400]),
                   ),
                 ],

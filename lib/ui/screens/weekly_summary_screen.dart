@@ -3,8 +3,6 @@ import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/screens/add_risk_screen.dart';
 import 'package:everyday_risk_analyzer/ui/screens/risk_detail_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
-import 'package:everyday_risk_analyzer/ui/widgets/alert_box.dart';
-import 'package:everyday_risk_analyzer/ui/widgets/recommendation_card.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/risk_card.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/summary_box.dart';
 import 'package:flutter/material.dart';
@@ -30,26 +28,23 @@ class WeeklySummaryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var summary = RiskLogicEngine.calculateWeeklySummary(risks);
     var recent = RiskLogicEngine.getRecentRisks(risks, days: 7);
-    var patterns = RiskLogicEngine.detectBehavioralPatterns(risks);
-    var prediction = RiskLogicEngine.predictNextWeekRisk(risks);
-    String recommendation = RiskLogicEngine.getRecommendation(risks);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Row(
           children: [
-            Text("Hello, ", style: TextStyle(color: Colors.grey.shade300),), 
-            Text(getGreeting(), style: TextStyle(color: Colors.white, fontSize: 30),)
-          ]
+            Text("Hello, ", style: TextStyle(color: Colors.grey.shade300)),
+            Text(
+              getGreeting(),
+              style: TextStyle(color: Colors.white, fontSize: 30),
+            ),
+          ],
         ),
         actions: [
           IconButton(
-            onPressed: () {}, 
-            icon: Icon(
-              Icons.notifications_active, 
-              color: Colors.white,
-            ),
+            onPressed: () {},
+            icon: Icon(Icons.notifications_active, color: Colors.white),
             padding: EdgeInsets.all(16),
           ),
         ],
@@ -69,8 +64,8 @@ class WeeklySummaryScreen extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)
-                    )
+                      bottomRight: Radius.circular(10),
+                    ),
                   ),
                 ),
 
@@ -100,15 +95,20 @@ class WeeklySummaryScreen extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Weekly Summary',
-                            style: Theme.of(context).textTheme.bodyLarge),
-                        Text('Dec 8 - Dec 14, 2025',
-                            style: TextStyle(
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
-                              fontSize: 12,
-                            )),
+                        Text(
+                          'Weekly Summary',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Text(
+                          'Dec 8 - Dec 14, 2025',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[400]
+                                : Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
                         SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -137,21 +137,6 @@ class WeeklySummaryScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 80),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: RecommendationCard(
-                recommendation: recommendation,
-                anomalies: patterns['anomalies'] as List<String>,
-                prediction: prediction,
-              ),
-            ),
-
-            SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: AlertBox(anomalies: patterns['anomalies'] as List<String>),
-            ),
-
             SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -172,37 +157,50 @@ class WeeklySummaryScreen extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.check_circle,
-                                size: 50, color: AppTheme.successColor),
+                            Icon(
+                              Icons.check_circle,
+                              size: 50,
+                              color: AppTheme.successColor,
+                            ),
                             SizedBox(height: 10),
-                            Text('No risks recorded!',
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            Text('Great job maintaining a healthy lifestyle.',
-                                style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text(
+                              'No risks recorded!',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            Text(
+                              'Great job maintaining a healthy lifestyle.',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     )
                   : Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ListView.builder(
                         padding: EdgeInsets.zero,
                         itemCount: recent.length,
                         itemBuilder: (context, index) {
                           final risk = recent[index];
                           return RiskCard(
                             risk: risk,
+                            showWeeklyFrequency: true,
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    RiskDetailScreen(risk: risk, onRiskDeleted: () {}),
+                                builder: (_) => RiskDetailScreen(
+                                  risk: risk,
+                                  onRiskDeleted: () {},
+                                ),
                               ),
                             ),
                           );
                         },
                       ),
-                  ),
+                    ),
             ),
           ],
         ),

@@ -140,16 +140,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 12),
       
-          // Account Settings
-          SettingItem(
-            icon: Icons.person,
-            title: 'Account Settings',
-            subtitle: 'Manage your account',
-            onTap: () {
-              _showSnackBar('Account settings coming soon!');
-            },
-          ),
-      
           // Privacy & Security
           SettingItem(
             icon: Icons.security,

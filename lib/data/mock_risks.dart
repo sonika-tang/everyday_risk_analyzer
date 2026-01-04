@@ -41,111 +41,113 @@ class StorageService {
     }
   }
 
-  // Get Mock risk (can change to UUID for the ID)
-  static List<RiskEntry> _getDefaultMockRisks() {
-    DateTime now = DateTime.now();
-    return [
-      RiskEntry(
-        id: '1',
-        title: 'Slept at 3 AM',
-        description: 'Sleep deprivation - Health',
-        category: 'Health',
-        severity: 'High',
-        date: now.subtract(Duration(days: 1)),
-        createdAt: now.subtract(Duration(days: 2)),
-      ),
-      RiskEntry(
-        id: '2',
-        title: 'Skipped breakfast',
-        description: 'Meal skipping - Health',
-        category: 'Health',
-        severity: 'Medium',
-        date: now.subtract(Duration(days: 1)),
-        createdAt: now.subtract(Duration(days: 2)),
-        frequency: 3,
-      ),
-      RiskEntry(
-        id: '3',
-        title: 'Forgot to hydrate',
-        description: 'Dehydration - Health',
-        category: 'Health',
-        severity: 'Low',
-        date: now.subtract(Duration(days: 2)),
-        createdAt: now.subtract(Duration(days: 3)),
-      ),
-      RiskEntry(
-        id: '4',
-        title: 'Rode bike without helmet',
-        description: 'Safety neglect - Safety',
-        category: 'Safety',
-        severity: 'High',
-        date: now.subtract(Duration(days: 2)),
-        createdAt: now.subtract(Duration(days: 3)),
-      ),
-      RiskEntry(
-        id: '5',
-        title: 'Overspending',
-        description: 'Financial risk - Finance',
-        category: 'Finance',
-        severity: 'High',
-        date: now.subtract(Duration(days: 2)),
-        createdAt: now.subtract(Duration(days: 3)),
-        frequency: 2,
-      ),
-      RiskEntry(
-        id: '6',
-        title: 'Overspending',
-        description: 'Financial risk - Finance',
-        category: 'Finance',
-        severity: 'High',
-        date: now.subtract(Duration(days: 2)),
-        createdAt: now.subtract(Duration(days: 3)),
-        frequency: 2,
-      ),
-      RiskEntry(
-        id: '7',
-        title: 'Overspending',
-        description: 'Financial risk - Finance',
-        category: 'Finance',
-        severity: 'High',
-        date: now.subtract(Duration(days: 4)),
-        createdAt: now.subtract(Duration(days: 3)),
-        frequency: 2,
-      ),
-    ];
-  }
-
-  // Save profile
-  static Future<void> saveProfile(UserProfile profile) async {
-    final file = await _getFile('profile.json');
-    await file.writeAsString(jsonEncode(profile.toJson()));
-  }
+// Get Mock risks (sample defaults)
+static List<RiskEntry> _getDefaultMockRisks() {
+  DateTime now = DateTime.now();
+  return [
+    RiskEntry(
+      id: '1',
+      title: 'Slept at 3 AM',
+      description: 'Sleep deprivation - Health',
+      category: 'Health',
+      severity: 'High',
+      date: now.subtract(const Duration(days: 1)),
+      createdAt: now.subtract(const Duration(days: 2)),
+      frequency: 1,
+      reason: 'Careless',
+      urgency: 'Calm',
+      controlLevel: 'Fully Avoidable',
+    ),
+    RiskEntry(
+      id: '2',
+      title: 'Skipped breakfast',
+      description: 'Meal skipping - Health',
+      category: 'Health',
+      severity: 'Medium',
+      date: now.subtract(const Duration(days: 1)),
+      createdAt: now.subtract(const Duration(days: 2)),
+      frequency: 3,
+      reason: 'Forgot',
+      urgency: 'Rushed',
+      controlLevel: 'Partially',
+    ),
+    RiskEntry(
+      id: '3',
+      title: 'Forgot to hydrate',
+      description: 'Dehydration - Health',
+      category: 'Health',
+      severity: 'Low',
+      date: now.subtract(const Duration(days: 2)),
+      createdAt: now.subtract(const Duration(days: 3)),
+      frequency: 2,
+      reason: 'Stress',
+      urgency: 'Calm',
+      controlLevel: 'Fully Avoidable',
+    ),
+    RiskEntry(
+      id: '4',
+      title: 'Rode bike without helmet',
+      description: 'Safety neglect - Safety',
+      category: 'Safety',
+      severity: 'High',
+      date: now.subtract(const Duration(days: 2)),
+      createdAt: now.subtract(const Duration(days: 3)),
+      frequency: 1,
+      reason: 'Careless',
+      urgency: 'Emergency',
+      controlLevel: 'Unavoidable',
+    ),
+    RiskEntry(
+      id: '5',
+      title: 'Overspending',
+      description: 'Financial risk - Finance',
+      category: 'Finance',
+      severity: 'High',
+      date: now.subtract(const Duration(days: 2)),
+      createdAt: now.subtract(const Duration(days: 3)),
+      frequency: 2,
+      reason: 'Financial',
+      urgency: 'Rushed',
+      controlLevel: 'Partially',
+    ),
+    RiskEntry(
+      id: '6',
+      title: 'Impulse shopping',
+      description: 'Bought unnecessary items',
+      category: 'Finance',
+      severity: 'Medium',
+      date: now.subtract(const Duration(days: 2)),
+      createdAt: now.subtract(const Duration(days: 3)),
+      frequency: 1,
+      reason: 'Careless',
+      urgency: 'Calm',
+      controlLevel: 'Fully Avoidable',
+    ),
+    RiskEntry(
+      id: '7',
+      title: 'Missed deadline',
+      description: 'Did not submit assignment on time',
+      category: 'Safety',
+      severity: 'High',
+      date: now.subtract(const Duration(days: 4)),
+      createdAt: now.subtract(const Duration(days: 3)),
+      frequency: 1,
+      reason: 'Stress',
+      urgency: 'Emergency',
+      controlLevel: 'Unavoidable',
+    ),
+  ];
+}
 
   // load profile
   static Future<UserProfile> loadProfile() async {
-    try {
-      final file = await _getFile('profile.json');
-      if (!await file.exists()) {
-        final defaultProfile = UserProfile(
-          id: 'user_${DateTime.now().millisecondsSinceEpoch}', // Can change to UUID
-          name: 'Nika',
-          email: 'sonika@gmail.com',
-          createdAt: DateTime.now(),
-        );
-        await saveProfile(defaultProfile);
-        return defaultProfile;
-      }
-      final json = await file.readAsString();
-      return UserProfile.fromJson(jsonDecode(json));
-    } catch (e) {
       final defaultProfile = UserProfile(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}', // Can change to UUID
+        id: 'U1',
         name: 'Nika',
         email: 'sonika@gmail.com',
         createdAt: DateTime.now(),
       );
       return defaultProfile;
-    }
   }
 
   // add risk
