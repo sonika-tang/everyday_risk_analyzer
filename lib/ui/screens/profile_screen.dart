@@ -160,16 +160,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
           ),
       
-          // // Notifications
-          // SettingItem(
-          //   icon: Icons.notifications,
-          //   title: 'Notifications',
-          //   subtitle: 'Manage alerts',
-          //   onTap: () {
-          //     _showSnackBar('Notification settings coming soon!');
-          //   },
-          // ),
-      
           // Appearance / Theme
           SettingItem(
             icon: Icons.color_lens,

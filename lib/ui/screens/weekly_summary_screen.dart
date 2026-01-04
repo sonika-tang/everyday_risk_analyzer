@@ -163,7 +163,7 @@ class WeeklySummaryScreen extends StatelessWidget {
 
             SizedBox(height: 12),
 
-            // ✅ Only RiskCards scroll
+            // Only RiskCards scroll
             Expanded(
               child: recent.isEmpty
                   ? Center(
@@ -207,7 +207,7 @@ class WeeklySummaryScreen extends StatelessWidget {
           ],
         ),
       ),
-      // ✅ FAB stays fixed bottom-right
+      // FAB stays fixed bottom-right
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
@@ -215,7 +215,7 @@ class WeeklySummaryScreen extends StatelessWidget {
             builder: (_) => AddRiskDialog(onRiskAdded: onRefresh),
           );
         },
-        shape: CircleBorder(side: BorderSide(width: 2)),
+        shape: CircleBorder(),
         child: Icon(Icons.add),
       ),
     );
