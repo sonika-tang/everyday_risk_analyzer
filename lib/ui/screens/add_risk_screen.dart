@@ -68,7 +68,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
 
               // Reason
               DropdownButtonFormField<String>(
-                value: selectedReason,
+                initialValue: selectedReason,
                 items: ['Stress', 'Forgot', 'Financial', 'Careless']
                     .map((reason) => DropdownMenuItem(
                           value: reason,
@@ -82,7 +82,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
 
               // Urgency
               DropdownButtonFormField<String>(
-                value: selectedUrgency,
+                initialValue: selectedUrgency,
                 items: ['Emergency', 'Rushed', 'Calm']
                     .map((urgency) => DropdownMenuItem(
                           value: urgency,
@@ -96,7 +96,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
 
               // Control Level
               DropdownButtonFormField<String>(
-                value: selectedControlLevel,
+                initialValue: selectedControlLevel,
                 items: ['Fully Avoidable', 'Partially', 'Unavoidable']
                     .map((level) => DropdownMenuItem(
                           value: level,
@@ -252,11 +252,11 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
       );
 
       await StorageService.addRisk(newRisk); // add to mock list
-      _showSnackBar('✅ Risk added successfully!', isError: false);
+      _showSnackBar('Risk added successfully!', isError: false);
       widget.onRiskAdded();
       Navigator.pop(context);
     } catch (e) {
-      _showSnackBar('❌ Error: ${e.toString()}', isError: true);
+      _showSnackBar('Error: ${e.toString()}', isError: true);
     } finally {
       if (mounted) {
         setState(() => isSubmitting = false);

@@ -1,4 +1,3 @@
-// Check the model again too - cuz this is just a mock one that I can think of
 class UserProfile {
   String id;
   String name;

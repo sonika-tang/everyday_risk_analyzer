@@ -72,7 +72,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Text(
                 currentView == CalendarView.month
                     ? '${_monthName(currentMonth.month)} ${currentMonth.year}'
-                    : '${_monthName(startOfWeek.month)} ${startOfWeek.day} – '
+                    : '${_monthName(startOfWeek.month)} ${startOfWeek.day} - '
                       '${_monthName(endOfWeek.month)} ${endOfWeek.day}, ${endOfWeek.year}',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -108,7 +108,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Text(
             currentView == CalendarView.month
                 ? "Risks for ${_monthName(currentMonth.month)} (${monthRisks.length})"
-                : "Risks for ${_monthName(startOfWeek.month)} ${startOfWeek.day} – "
+                : "Risks for ${_monthName(startOfWeek.month)} ${startOfWeek.day} - "
                   "${_monthName(endOfWeek.month)} ${endOfWeek.day} (${weekRisks.length})",
             style: Theme.of(context).textTheme.headlineMedium,
           ),

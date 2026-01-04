@@ -1,4 +1,3 @@
-// Check the model again too - cuz this is just a mock one that I can think of
 class RiskEntry {
   String id;
   String title;
@@ -8,10 +7,9 @@ class RiskEntry {
   DateTime date;
   DateTime createdAt;
   int frequency; // how many times user repeated this risk
-  String controlLevel;   // Fully Avoidable / Partially / Unavoidable
-  String reason;    //reason
-  String urgency;        // Calm / Rushed / Emergency
-
+  String controlLevel; // Fully Avoidable / Partially / Unavoidable
+  String reason; //reason
+  String urgency; // Calm / Rushed / Emergency
 
   RiskEntry({
     required this.id,
@@ -37,10 +35,9 @@ class RiskEntry {
     'createdAt': createdAt.toIso8601String(),
     'frequency': frequency,
     'controlLevel': controlLevel,
-    'reson': reason,
+    'reason': reason,
     'urgency': urgency,
   };
-
 
   factory RiskEntry.fromJson(Map<String, dynamic> json) => RiskEntry(
     id: json['id'],
@@ -52,7 +49,7 @@ class RiskEntry {
     createdAt: DateTime.parse(json['createdAt']),
     frequency: json['frequency'] ?? 1,
     controlLevel: json['controlLevel'],
-    reason: json['reson'],
+    reason: json['reason'],
     urgency: json['urgency'],
   );
 }

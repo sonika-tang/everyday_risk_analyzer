@@ -1,15 +1,12 @@
-// ignore_for_file: constant_identifier_names
+
 
 import 'package:everyday_risk_analyzer/logic/serverity_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
-import 'package:everyday_risk_analyzer/models/risk_statistic.dart';
 import 'package:everyday_risk_analyzer/data/behavior_patterns.dart';
 
 class RiskLogicEngine {
-  static const int CRITICAL_THRESHOLD = 20;
-  static const int HIGH_THRESHOLD = 12;
-  static const int MEDIUM_THRESHOLD = 5;
 
+  // Filter by month
   static List<RiskEntry> filterByMonth(
     List<RiskEntry> risks,
     int month,
@@ -195,58 +192,58 @@ class RiskLogicEngine {
     return (totalScore / risks.length).clamp(0, 100);
   }
 
-  // Algorithm 4: Predictive modeling - forecast next week's risk level
-  static Map<String, dynamic> predictNextWeekRisk(List<RiskEntry> risks) {
-    DateTime now = DateTime.now();
-    DateTime lastWeekStart = now.subtract(Duration(days: 7));
+  // // Algorithm 4: Predictive modeling - forecast next week's risk level
+  // static Map<String, dynamic> predictNextWeekRisk(List<RiskEntry> risks) {
+  //   DateTime now = DateTime.now();
+  //   DateTime lastWeekStart = now.subtract(Duration(days: 7));
 
-    int lastWeekRisks = risks
-        .where((r) => r.date.isAfter(lastWeekStart) && r.date.isBefore(now))
-        .length;
+  //   int lastWeekRisks = risks
+  //       .where((r) => r.date.isAfter(lastWeekStart) && r.date.isBefore(now))
+  //       .length;
 
-    // Trend analysis: predict based on pattern
-    int predictedRisks = (lastWeekRisks * 1.15)
-        .toInt(); // 15% increase prediction
+  //   // Trend analysis: predict based on pattern
+  //   int predictedRisks = (lastWeekRisks * 1.15)
+  //       .toInt(); // 15% increase prediction
 
-    String prediction = 'Based on last week: ~$predictedRisks risks expected';
-    if (lastWeekRisks > CRITICAL_THRESHOLD) {
-      prediction += ' - CRITICAL!';
-    } else if (lastWeekRisks > HIGH_THRESHOLD) {
-      prediction += ' - HIGH!';
-    }
+  //   String prediction = 'Based on last week: ~$predictedRisks risks expected';
+  //   if (lastWeekRisks > CRITICAL_THRESHOLD) {
+  //     prediction += ' - CRITICAL!';
+  //   } else if (lastWeekRisks > HIGH_THRESHOLD) {
+  //     prediction += ' - HIGH!';
+  //   }
 
-    return {
-      'lastWeekCount': lastWeekRisks,
-      'predictedCount': predictedRisks,
-      'prediction': prediction,
-      'confidence': 0.78,
-    };
-  }
+  //   return {
+  //     'lastWeekCount': lastWeekRisks,
+  //     'predictedCount': predictedRisks,
+  //     'prediction': prediction,
+  //     'confidence': 0.78,
+  //   };
+  // }
 
-  // Algorithm 5: Get customized recommendation based on risk profile
-  static String getRecommendation(List<RiskEntry> risks) {
-    double score = calculateRiskScore(risks);
-    var patterns = detectBehavioralPatterns(risks);
-    var weeklyTotal = calculateWeeklySummary(risks);
-    int total =
-        (weeklyTotal['health'] ?? 0) +
-        (weeklyTotal['finance'] ?? 0) +
-        (weeklyTotal['safety'] ?? 0);
+  // // Algorithm 5: Get customized recommendation based on risk profile
+  // static String getRecommendation(List<RiskEntry> risks) {
+  //   double score = calculateRiskScore(risks);
+  //   var patterns = detectBehavioralPatterns(risks);
+  //   var weeklyTotal = calculateWeeklySummary(risks);
+  //   int total =
+  //       (weeklyTotal['health'] ?? 0) +
+  //       (weeklyTotal['finance'] ?? 0) +
+  //       (weeklyTotal['safety'] ?? 0);
 
-    if (score >= 80) {
-      return 'CRITICAL: You have taken way too many high-risk behaviors. Immediate action required to reduce risks.';
-    } else if (score >= 60) {
-      return 'SEVERE: Your risk level is dangerously high (${score.toStringAsFixed(0)}/100). Reduce risky behaviors now.';
-    } else if (score >= 40) {
-      return 'HIGH: Multiple risk patterns detected. ${(patterns['anomalies'] as List).length} concern(s) identified. Reduce activities.';
-    } else if (score >= 25) {
-      return 'MODERATE: You have $total risks this week. Stay vigilant and reduce exposure.';
-    } else if (score > 0) {
-      return 'GOOD: ${total > 0 ? "You have $total risks but managing well" : "You are maintaining a healthy lifestyle"}. Keep it up!';
-    } else {
-      return 'EXCELLENT: No risks recorded! Maintain this healthy lifestyle.';
-    }
-  }
+  //   if (score >= 80) {
+  //     return 'CRITICAL: You have taken way too many high-risk behaviors. Immediate action required to reduce risks.';
+  //   } else if (score >= 60) {
+  //     return 'SEVERE: Your risk level is dangerously high (${score.toStringAsFixed(0)}/100). Reduce risky behaviors now.';
+  //   } else if (score >= 40) {
+  //     return 'HIGH: Multiple risk patterns detected. ${(patterns['anomalies'] as List).length} concern(s) identified. Reduce activities.';
+  //   } else if (score >= 25) {
+  //     return 'MODERATE: You have $total risks this week. Stay vigilant and reduce exposure.';
+  //   } else if (score > 0) {
+  //     return 'GOOD: ${total > 0 ? "You have $total risks but managing well" : "You are maintaining a healthy lifestyle"}. Keep it up!';
+  //   } else {
+  //     return 'EXCELLENT: No risks recorded! Maintain this healthy lifestyle.';
+  //   }
+  // }
 
   // Weekly summary
   static Map<String, int> calculateWeeklySummary(List<RiskEntry> risks) {
@@ -328,53 +325,7 @@ class RiskLogicEngine {
         .toList();
   }
 
-  // Generate statistic
-  static RiskStatistics generateStatistics(List<RiskEntry> risks) {
-    var summary = calculateWeeklySummary(risks);
-    int total =
-        (summary['health'] ?? 0) +
-        (summary['finance'] ?? 0) +
-        (summary['safety'] ?? 0);
-    int high = risks.where((r) => r.severity == 'High').length;
-    int medium = risks.where((r) => r.severity == 'Medium').length;
-    int low = risks.where((r) => r.severity == 'Low').length;
-
-    return RiskStatistics(
-      id: 'stat_${DateTime.now().millisecondsSinceEpoch}',
-      generatedAt: DateTime.now(),
-      totalRisks: total,
-      highRiskCount: high,
-      mediumRiskCount: medium,
-      lowRiskCount: low,
-      risksByCategory: summary.cast<String, int>(),
-      overallRiskScore: calculateRiskScore(risks),
-      recommendation: getRecommendation(risks),
-    );
-  }
-
-  // Algorithm 6: Monthly trend analysis
-  static Map<String, dynamic> getMonthlyTrend(
-    List<RiskEntry> risks,
-    int month,
-    int year,
-  ) {
-    List<RiskEntry> monthRisks = risks
-        .where((r) => r.date.year == year && r.date.month == month)
-        .toList();
-
-    int high = monthRisks.where((r) => r.severity == 'High').length;
-    int medium = monthRisks.where((r) => r.severity == 'Medium').length;
-    int low = monthRisks.where((r) => r.severity == 'Low').length;
-
-    return {
-      'total': monthRisks.length,
-      'high': high,
-      'medium': medium,
-      'low': low,
-      'avgPerDay': monthRisks.length / 30,
-    };
-  }
-
+  // Algorithm 6: Monthly and weekly trend analysis
   int getWeeklyFrequency(RiskEntry risk, List<RiskEntry> allRisks) {
     DateTime now = DateTime.now();
     DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));

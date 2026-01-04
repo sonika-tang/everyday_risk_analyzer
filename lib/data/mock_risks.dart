@@ -41,7 +41,6 @@ class StorageService {
     }
   }
 
-  // Get Mock risk (can change to UUID for the ID)
 // Get Mock risks (sample defaults)
 static List<RiskEntry> _getDefaultMockRisks() {
   DateTime now = DateTime.now();
@@ -140,37 +139,15 @@ static List<RiskEntry> _getDefaultMockRisks() {
   ];
 }
 
-  // Save profile
-  static Future<void> saveProfile(UserProfile profile) async {
-    final file = await _getFile('profile.json');
-    await file.writeAsString(jsonEncode(profile.toJson()));
-  }
-
   // load profile
   static Future<UserProfile> loadProfile() async {
-    try {
-      final file = await _getFile('profile.json');
-      if (!await file.exists()) {
-        final defaultProfile = UserProfile(
-          id: 'user_${DateTime.now().millisecondsSinceEpoch}', // Can change to UUID
-          name: 'Nika',
-          email: 'sonika@gmail.com',
-          createdAt: DateTime.now(),
-        );
-        await saveProfile(defaultProfile);
-        return defaultProfile;
-      }
-      final json = await file.readAsString();
-      return UserProfile.fromJson(jsonDecode(json));
-    } catch (e) {
       final defaultProfile = UserProfile(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}', // Can change to UUID
+        id: 'U1',
         name: 'Nika',
         email: 'sonika@gmail.com',
         createdAt: DateTime.now(),
       );
       return defaultProfile;
-    }
   }
 
   // add risk

@@ -15,7 +15,6 @@ class SeverityCalculator {
     String urgency = '',
     String reason = '',
   }) {
-    String combined = ('$title $description').toLowerCase();
     int riskScore = 0;
 
     // ControlLevel weighting
@@ -46,26 +45,6 @@ class SeverityCalculator {
       if (r.contains('financial')) return 2;
       if (r.contains('careless')) return 2;
       return 0;
-    }
-
-    // Keywords analysis
-    final highRiskKeywords = [
-      'critical','severe','emergency','accident','dangerous',
-      'collapsed','extreme','serious','fatal','broken',
-      'injured','overdose','bankruptcy',
-    ];
-
-    final mediumRiskKeywords = [
-      'skipped','forgot','missed','ignored','avoid',
-      'reckless','careless','overspent','debt','stress',
-      'anxiety','tired','dehydration','weak',
-    ];
-
-    for (var keyword in highRiskKeywords) {
-      if (combined.contains(keyword)) riskScore += 3;
-    }
-    for (var keyword in mediumRiskKeywords) {
-      if (combined.contains(keyword)) riskScore += 2;
     }
 
     // Category-based scoring
