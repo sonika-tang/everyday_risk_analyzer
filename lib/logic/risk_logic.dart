@@ -67,7 +67,14 @@ class RiskLogicEngine {
           pattern.keywords.any((kw) => text.contains(kw)));
     }).length;
 
-    String baseSeverity = risk.severity;
+    final baseSeverity = SeverityCalculator.calculateSeverity(
+      risk.title,
+      risk.description,
+      risk.category,
+      controlLevel: risk.controlLevel,
+      urgency: risk.urgency,
+      reason: risk.reason,
+    ).label;
 
     if (similarCount >= 5) return 'High';
     if (similarCount >= 3) {
@@ -296,9 +303,36 @@ class RiskLogicEngine {
         .toList();
 
     return {
-      'high': catRisks.where((r) => r.severity == 'High').length,
-      'medium': catRisks.where((r) => r.severity == 'Medium').length,
-      'low': catRisks.where((r) => r.severity == 'Low').length,
+      'high': catRisks.where((r) =>
+        SeverityCalculator.calculateSeverity(
+          r.title,
+          r.description,
+          r.category,
+          controlLevel: r.controlLevel,
+          urgency: r.urgency,
+          reason: r.reason,
+        ).label == 'High'
+      ).length,
+      'medium': catRisks.where((r) =>
+        SeverityCalculator.calculateSeverity(
+          r.title,
+          r.description,
+          r.category,
+          controlLevel: r.controlLevel,
+          urgency: r.urgency,
+          reason: r.reason,
+        ).label == 'Medium'
+      ).length,
+      'low': catRisks.where((r) =>
+        SeverityCalculator.calculateSeverity(
+          r.title,
+          r.description,
+          r.category,
+          controlLevel: r.controlLevel,
+          urgency: r.urgency,
+          reason: r.reason,
+        ).label == 'Low'
+      ).length,
     };
   }
 
