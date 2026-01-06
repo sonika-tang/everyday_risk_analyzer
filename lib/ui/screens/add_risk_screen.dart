@@ -126,38 +126,6 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
                   _updateSeverity();
                 },
               ),
-              const SizedBox(height: 16),
-
-              // Severity Display
-              if (calculatedSeverity != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _getSeverityColor(calculatedSeverity!).withValues(alpha: .1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _getSeverityColor(calculatedSeverity!),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _getSeverityIcon(calculatedSeverity!),
-                        color: _getSeverityColor(calculatedSeverity!),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Severity: $calculatedSeverity',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _getSeverityColor(calculatedSeverity!),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
 
               // Date
               DateSelector(
