@@ -1,6 +1,4 @@
-
-
-import 'package:everyday_risk_analyzer/logic/serverity_logic.dart';
+import 'package:everyday_risk_analyzer/logic/severity_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/data/behavior_patterns.dart';
 
@@ -279,9 +277,9 @@ class RiskLogicEngine {
     }
 
     return {
-      'health': health,
-      'finance': finance,
-      'safety': safety,
+      'Health': health,
+      'Finance': finance,
+      'Safety': safety,
     };
   }
 

@@ -1,5 +1,5 @@
-import 'package:everyday_risk_analyzer/data/mock_risks.dart';
-import 'package:everyday_risk_analyzer/logic/serverity_logic.dart';
+import 'package:everyday_risk_analyzer/data/risk_storage_service.dart';
+import 'package:everyday_risk_analyzer/logic/severity_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/category_selector.dart';
@@ -251,7 +251,8 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
         urgency: selectedUrgency,
       );
 
-      await StorageService.addRisk(newRisk); // add to mock list
+      await RiskStorageService.addRisk(newRisk); // add to storage
+      if (!mounted) return;
       _showSnackBar('Risk added successfully!', isError: false);
       widget.onRiskAdded();
       Navigator.pop(context);

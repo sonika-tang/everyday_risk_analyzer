@@ -55,6 +55,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
     final weekStart = getWeekStart(selectedWeek);
     final weekEnd = getWeekEnd(selectedWeek);
     final summary = RiskLogicEngine.calculateWeeklySummary(widget.risks, weekStart);
+    final int totalRisks = (summary['Health'] ?? 0) + (summary['Finance'] ?? 0) + (summary['Safety'] ?? 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -123,7 +124,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Weekly Summary',
+                          'Weekly Summary (Total: $totalRisks)',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         Text(
@@ -226,7 +227,7 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
                               MaterialPageRoute(
                                 builder: (_) => RiskDetailScreen(
                                   risk: risk,
-                                  onRiskDeleted: () {},
+                                  onRiskDeleted: widget.onRefresh,
                                 ),
                               ),
                             ),

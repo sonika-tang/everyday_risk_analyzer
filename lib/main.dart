@@ -1,4 +1,4 @@
-import 'package:everyday_risk_analyzer/data/mock_risks.dart';
+import 'package:everyday_risk_analyzer/data/risk_storage_service.dart';
 import 'package:everyday_risk_analyzer/models/user.dart';
 import 'package:everyday_risk_analyzer/ui/screens/splash_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
@@ -26,7 +26,7 @@ class _RiskAnalysisAppState extends State<RiskAnalysisApp> {
   }
 
   void _loadProfile() async {
-    final profile = await StorageService.loadProfile();
+    final profile = await RiskStorageService.getProfile();
     setState(() {
       _profile = profile;
       _isLoadingProfile = false;
@@ -58,13 +58,7 @@ class _RiskAnalysisAppState extends State<RiskAnalysisApp> {
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
-
-    // return MaterialApp(
-    //   title: 'Risk Analysis',
-    //   theme: _profile!.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
-    //   home: SplashScreen(onThemeChange: _loadProfile),
-    //   debugShowCheckedModeBanner: false,
-    // );
+    
     return MaterialApp(
       title: 'Risk Analysis',
       theme: AppTheme.lightTheme, 

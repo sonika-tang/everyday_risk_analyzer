@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 
 class CalendarScreen extends StatefulWidget {
   final List<RiskEntry> risks;
+  final VoidCallback onRefresh;
 
-  const CalendarScreen({super.key, required this.risks});
+  const CalendarScreen({super.key, required this.risks, required this.onRefresh});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -141,7 +142,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) =>
-                      RiskDetailScreen(risk: risk, onRiskDeleted: () {}),
+                      RiskDetailScreen(risk: risk, onRiskDeleted: widget.onRefresh),
                 ),
               ),
             ),
@@ -160,6 +161,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
     ).day;
 
     List<Widget> dayWidgets = [];
+
+    // Add Key Days of Week
+    final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    for (var day in daysOfWeek) {
+      dayWidgets.add(
+        Center(
+          child: Text(
+            day,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+
     for (int i = 1; i < firstDay; i++) {
       dayWidgets.add(SizedBox());
     }
@@ -272,7 +290,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           MaterialPageRoute(
                             builder: (_) => RiskDetailScreen(
                               risk: risk,
-                              onRiskDeleted: () {},
+                              onRiskDeleted: widget.onRefresh,
                             ),
                           ),
                         ),

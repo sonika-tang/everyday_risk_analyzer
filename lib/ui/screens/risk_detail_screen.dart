@@ -1,4 +1,4 @@
-import 'package:everyday_risk_analyzer/data/mock_risks.dart';
+import 'package:everyday_risk_analyzer/data/risk_storage_service.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/info_tile.dart';
@@ -40,7 +40,7 @@ class RiskDetailScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.delete, color: AppTheme.highRiskColor),
-            onPressed: () => _confirmDelete(context), // (still does not work)
+            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),
@@ -141,7 +141,8 @@ class RiskDetailScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await StorageService.deleteRisk(risk.id);
+              await RiskStorageService.deleteRisk(risk.id);
+              if (!context.mounted) return; //check to prevent updating or navigating from a widget that’s no longer in the widget tree
               Navigator.pop(context);
               Navigator.pop(context);
               onRiskDeleted();

@@ -1,4 +1,4 @@
-import 'package:everyday_risk_analyzer/data/mock_risks.dart';
+import 'package:everyday_risk_analyzer/data/risk_storage_service.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/models/user.dart';
 import 'package:everyday_risk_analyzer/ui/screens/calendar_screen.dart';
@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final risks = await StorageService.loadRisks();
-    final profile = await StorageService.loadProfile();
+    final risks = await RiskStorageService.getRisks();
+    final profile = await RiskStorageService.getProfile();
 
     if (!mounted) return;
 
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: _onRiskAdded,
           ),
           RiskOverviewScreen(key: ValueKey(1), risks: _risks),
-          CalendarScreen(key: ValueKey(2), risks: _risks),
+          CalendarScreen(key: ValueKey(2), risks: _risks, onRefresh: _onRiskAdded),
           ProfileScreen(
             key: ValueKey(3),
             profile: _profile!,
