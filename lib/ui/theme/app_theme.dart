@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Check the theme color again too (I put dark color as primary color) if you don't want it you can change
   static const Color primaryColor = Color(0xFF1e3a5f);
   static const Color accentColor = Color(0xFF00d4ff);
   static const Color highRiskColor = Color(0xFFef4444);

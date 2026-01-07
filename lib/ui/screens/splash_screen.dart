@@ -12,7 +12,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-with SingleTickerProviderStateMixin {
+with SingleTickerProviderStateMixin { // Keep the refresh rate of the app (not skip any frame) - keeps them in sync with screen refresh
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -22,21 +22,21 @@ with SingleTickerProviderStateMixin {
     super.initState();
     _animationController = AnimationController(
       duration: Duration(seconds: 2),
-      vsync: this,
+      vsync: this, //uses the state object as ticker provider
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(     //Tween from 0 (transparent) → 1 (opaque)
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn), //Uses Curves.easeIn for smooth start
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1).animate(  //Tween from 0.5 (half size) → 1 (full size)
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut), // Uses Curves.elasticOut for a springy “pop-in” effect
     );
 
-    _animationController.forward();
+    _animationController.forward(); //Starts the animation immediately when splash screen loads
 
     Future.delayed(Duration(seconds: 3), () {
-      if (mounted) {
+      if (mounted) { //ensures widget is still in the tree before navigating
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>

@@ -1,7 +1,6 @@
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
-/// Reusable Setting Item Widget
 class SettingItem extends StatelessWidget {
   final IconData icon;
   final String title;

@@ -37,7 +37,7 @@ class RiskStorageService {
     }
   }
 
-  // Get user profile (mock for now, as in original code)
+  // Get user profile (mock for now)
   static Future<UserProfile> getProfile() async {
     return UserProfile(
       id: 'U1',

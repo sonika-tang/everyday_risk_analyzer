@@ -77,7 +77,7 @@ class RiskLogicEngine {
     return 'UNCLASSIFIED';
   }
 
-  // Algorithm 3: Calculate overall risk score (0-100)
+  // Algorithm 3: Calculate overall risk score
   static double calculateRiskScore(List<RiskEntry> risks) {
     if (risks.isEmpty) return 0;
 
@@ -124,6 +124,7 @@ class RiskLogicEngine {
             !dateOnly(r.date).isBefore(lastWeekStart) &&
             !dateOnly(r.date).isAfter(lastWeekEnd))
         .toList();
+        
     // Count by category 
     Map<String, int> thisWeekCounts = {
       'Health': thisWeekRisks.where((r) => r.category == 'Health').length,

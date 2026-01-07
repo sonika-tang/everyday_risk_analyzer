@@ -56,6 +56,7 @@ class RiskDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             // Main Card
             Container(
               width: double.infinity,
@@ -70,6 +71,7 @@ class RiskDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  
                   // Title with Severity Icon
                   Row(
                     children: [
@@ -190,8 +192,9 @@ class RiskDetailScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               await RiskStorageService.deleteRisk(risk.id);
-              if (!context.mounted)
+              if (!context.mounted) {
                 return; //check to prevent updating or navigating from a widget that’s no longer in the widget tree
+              }
               Navigator.pop(context);
               Navigator.pop(context);
               onRiskDeleted();

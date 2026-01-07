@@ -50,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: DefaultAppBar(),
       body: ListView(
         children: [
+          
           // Profile Header
           Container(
             width: double.infinity,
@@ -65,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Column(
               children: [
+
                 // Avatar
                 Container(
                   width: 100,
