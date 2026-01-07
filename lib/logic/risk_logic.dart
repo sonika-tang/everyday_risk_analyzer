@@ -14,29 +14,6 @@ class RiskLogicEngine {
         .toList();
   }
 
-  static String calculateRiskFor(List<RiskEntry> risks) {
-    if (risks.isEmpty) return 'None';
-
-    Map<String, int> categoryImpact = {'Health': 0, 'Finance': 0, 'Safety': 0};
-
-    for (var risk in risks) {
-      final severity = SeverityCalculator.calculateSeverity(
-        risk.title,
-        risk.description,
-        risk.category,
-        controlLevel: risk.controlLevel,
-        urgency: risk.urgency,
-        reason: risk.reason,
-      );
-      categoryImpact[risk.category] =
-          (categoryImpact[risk.category] ?? 0) + severity.weight;
-    }
-
-    return categoryImpact.entries
-        .reduce((a, b) => a.value >= b.value ? a : b)
-        .key;
-  }
-
   // Algorithm 1: Risk Severity Escalation based on repetition patterns
   static String evaluateEscalatedSeverity(
     RiskEntry risk,
