@@ -127,6 +127,9 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
             data: healthCat,
             color: AppTheme.healthColor,
             risks: monthlyRisk,
+            onRefresh: () {
+              setState(() {});
+            },
           ),
           SizedBox(height: 16),
           CategoryBox(
@@ -134,6 +137,9 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
             data: safetyCat,
             color: AppTheme.safetyColor,
             risks: monthlyRisk,
+            onRefresh: () {
+              setState(() {});
+            },
           ),
           SizedBox(height: 16),
           CategoryBox(
@@ -141,6 +147,9 @@ class _RiskOverviewScreenState extends State<RiskOverviewScreen> {
             data: financeCat,
             color: AppTheme.financeColor, 
             risks: monthlyRisk,
+            onRefresh: () {
+              setState(() {});
+            },
           ),
           SizedBox(height: 20),
         ],

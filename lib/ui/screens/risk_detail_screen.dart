@@ -6,16 +6,23 @@ import 'package:flutter/material.dart';
 
 class RiskDetailScreen extends StatelessWidget {
   final RiskEntry risk;
+  final String severity;
+  final int weeklyFrequency;
+  final int monthlyFrequency;
   final VoidCallback onRiskDeleted;
 
-  const RiskDetailScreen({super.key, 
+  const RiskDetailScreen({
+    super.key,
     required this.risk,
+    required this.severity,
+    required this.weeklyFrequency,
+    required this.monthlyFrequency,
     required this.onRiskDeleted,
   });
 
   Color _getSeverityColor() {
-    if (risk.severity == 'High') return AppTheme.highRiskColor;
-    if (risk.severity == 'Medium') return AppTheme.mediumRiskColor;
+    if (severity == 'High') return AppTheme.highRiskColor;
+    if (severity == 'Medium') return AppTheme.mediumRiskColor;
     return AppTheme.lowRiskColor;
   }
 
@@ -26,8 +33,8 @@ class RiskDetailScreen extends StatelessWidget {
   }
 
   IconData _getSeverityIcon() {
-    if (risk.severity == 'High') return Icons.dangerous;
-    if (risk.severity == 'Medium') return Icons.warning;
+    if (severity == 'High') return Icons.dangerous;
+    if (severity == 'Medium') return Icons.warning;
     return Icons.info;
   }
 
@@ -66,17 +73,31 @@ class RiskDetailScreen extends StatelessWidget {
                   // Title with Severity Icon
                   Row(
                     children: [
-                      Icon(_getSeverityIcon(), color: _getSeverityColor(), size: 28),
+                      Icon(
+                        _getSeverityIcon(),
+                        color: _getSeverityColor(),
+                        size: 28,
+                      ),
                       SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(risk.title,
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              risk.title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             SizedBox(height: 6),
-                            Text(risk.category,
-                                style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            Text(
+                              risk.category,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -88,12 +109,18 @@ class RiskDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Chip(
-                        label: Text(risk.severity, style: TextStyle(color: Colors.white)),
+                        label: Text(
+                          severity,
+                          style: TextStyle(color: Colors.white),
+                        ),
                         backgroundColor: _getSeverityColor(),
                       ),
                       SizedBox(width: 8),
                       Chip(
-                        label: Text(risk.category, style: TextStyle(color: Colors.white)),
+                        label: Text(
+                          risk.category,
+                          style: TextStyle(color: Colors.white),
+                        ),
                         backgroundColor: _getCategoryColor(),
                       ),
                     ],
@@ -101,10 +128,15 @@ class RiskDetailScreen extends StatelessWidget {
                   SizedBox(height: 20),
 
                   // Description
-                  Text('Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text(
+                    'Description',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                   SizedBox(height: 8),
                   Text(
-                    risk.description.isEmpty ? 'No description provided' : risk.description,
+                    risk.description.isEmpty
+                        ? 'No description provided'
+                        : risk.description,
                     style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                   ),
                 ],
@@ -113,15 +145,31 @@ class RiskDetailScreen extends StatelessWidget {
             SizedBox(height: 24),
 
             // Info Section
-            Text('Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(
+              'Information',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 12),
-            InfoTile('Date', '${risk.date.day}/${risk.date.month}/${risk.date.year}'),
-            InfoTile('Recorded', '${risk.createdAt.day}/${risk.createdAt.month}/${risk.createdAt.year}'),
+            InfoTile(
+              'Date',
+              '${risk.date.day}/${risk.date.month}/${risk.date.year}',
+            ),
+            InfoTile(
+              'Recorded',
+              '${risk.createdAt.day}/${risk.createdAt.month}/${risk.createdAt.year}',
+            ),
             InfoTile('Reason', risk.reason),
             InfoTile('Urgency', risk.urgency),
             InfoTile('Control Level', risk.controlLevel),
-            InfoTile('Frequency', '${risk.frequency} time${risk.frequency > 1 ? 's' : ''}'),
-            InfoTile('Severity', risk.severity),
+            InfoTile(
+              'Weekly Frequency',
+              '$weeklyFrequency time${weeklyFrequency > 1 ? 's' : ''}',
+            ),
+            InfoTile(
+              'Monthly Frequency',
+              '$monthlyFrequency time${monthlyFrequency > 1 ? 's' : ''}',
+            ),
+            InfoTile('Severity', severity),
           ],
         ),
       ),
@@ -142,12 +190,15 @@ class RiskDetailScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               await RiskStorageService.deleteRisk(risk.id);
-              if (!context.mounted) return; //check to prevent updating or navigating from a widget that’s no longer in the widget tree
+              if (!context.mounted)
+                return; //check to prevent updating or navigating from a widget that’s no longer in the widget tree
               Navigator.pop(context);
               Navigator.pop(context);
               onRiskDeleted();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.highRiskColor),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.highRiskColor,
+            ),
             child: Text('Delete'),
           ),
         ],

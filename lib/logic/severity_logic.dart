@@ -43,7 +43,7 @@ class SeverityCalculator {
       if (r.contains('stress')) return 2;
       if (r.contains('forgot')) return 1;
       if (r.contains('financial')) return 2;
-      if (r.contains('careless')) return 2;
+      if (r.contains('careless')) return 3;
       return 0;
     }
 
@@ -64,8 +64,8 @@ class SeverityCalculator {
     riskScore = riskScore.clamp(0, 20);
 
     // Return both label + weight
-    if (riskScore >= 8) return SeverityResult('High', 15);
-    if (riskScore >= 4) return SeverityResult('Medium', 8);
+    if (riskScore >= 12) return SeverityResult('High', 15);
+    if (riskScore >= 8) return SeverityResult('Medium', 8);
     return SeverityResult('Low', 3);
   }
 }

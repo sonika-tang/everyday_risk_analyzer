@@ -1,3 +1,4 @@
+import 'package:everyday_risk_analyzer/logic/risk_logic.dart';
 import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/ui/screens/risk_detail_screen.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
@@ -8,6 +9,7 @@ class CategoryBox extends StatelessWidget {
   final String title;
   final Map<String, int> data;
   final Color color;
+  final VoidCallback onRefresh;
 
   final List<RiskEntry> risks;
 
@@ -17,12 +19,16 @@ class CategoryBox extends StatelessWidget {
     required this.data,
     required this.color,
     required this.risks,
+    required this.onRefresh
   });
 
   void _showMonthCategoryRisks(BuildContext context) {
-    final categoryRisks = risks
-        .where((risk) => risk.category == title)
-        .toList();
+    final now = DateTime.now();
+    final categoryRisks = risks.where((risk) =>
+      risk.category == title &&
+      risk.date.year == now.year &&
+      risk.date.month == now.month
+    ).toList();
 
     showModalBottomSheet(
       context: context,
@@ -48,27 +54,45 @@ class CategoryBox extends StatelessWidget {
                 ),
               )
             else
-            Expanded(
-              child: ListView(
-                children: categoryRisks
-                    .map(
-                      (risk) => RiskCard(
-                        risk: risk,
-                        showMonthlyFrequency: true,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => RiskDetailScreen(
+              Expanded(
+                child: ListView(
+                  children: categoryRisks.map((risk) {
+                    final computedSeverity =
+                        RiskLogicEngine.evaluateEscalatedSeverity(risk, risks);
+
+                    final weeklyCount =
+                        RiskLogicEngine().getWeeklyFrequency(risk, risks);
+
+                    final monthlyCount =
+                        RiskLogicEngine().getMonthlyFrequency(risk, risks);
+
+                    return RiskCard(
+                      risk: risk,
+                      severity: computedSeverity,       
+                      weeklyFrequency: weeklyCount,     
+                      monthlyFrequency: monthlyCount,     
+                      showMonthlyFrequency: true,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) {
+                            final severity = RiskLogicEngine.evaluateEscalatedSeverity(risk, risks);
+                            final weekly = RiskLogicEngine().getWeeklyFrequency(risk, risks);
+                            final monthly = RiskLogicEngine().getMonthlyFrequency(risk, risks);
+                            return RiskDetailScreen(
+                              severity: severity,
+                              weeklyFrequency: weekly,
+                              monthlyFrequency: monthly,
                               risk: risk,
-                              onRiskDeleted: () {},
-                            ),
-                          ),
+                              onRiskDeleted: onRefresh,
+                            );
+                          },
                         ),
                       ),
-                    )
-                    .toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
           ],
         ),
       ),

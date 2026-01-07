@@ -81,18 +81,6 @@ UI updates dynamically based on user interactions and stored data.
 **Wireframe & Design:**  [Figma – Everyday Risk Analyzer](https://www.figma.com/design/yLhdCgrvvNoNFB2ZrEdXYD/Everyday-Risk-Analyzer)
 
 
-## Assets & Credits
-
-All assets used in this project are either self-designed or sourced from free, open-license platforms.
-
-| Asset Type | Source | License |
-|-----------|-------|---------|
-| Icons | Material Icons (Flutter SDK) | Apache 2.0 |
-| Fonts | Google Fonts | Open Source |
-| UI References | Figma Community | Free / Attribution |
-
----
-
 ## Installation & Setup
 
 1. Clone the repository:

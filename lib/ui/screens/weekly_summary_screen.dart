@@ -219,16 +219,42 @@ class _WeeklySummaryScreenState extends State<WeeklySummaryScreen> {
                         itemCount: recent.length,
                         itemBuilder: (context, index) {
                           final risk = recent[index];
+                            final computedSeverity =
+                              RiskLogicEngine.evaluateEscalatedSeverity(
+                                risk,
+                                widget.risks,
+                              );
+                            final weeklyCount =
+                              RiskLogicEngine().getWeeklyFrequency(
+                                risk,
+                                widget.risks,
+                              );
+                            final monthlyCount =
+                              RiskLogicEngine().getMonthlyFrequency(
+                                risk, 
+                                widget.risks
+                              );
                           return RiskCard(
                             risk: risk,
+                            severity: computedSeverity,
+                            weeklyFrequency: weeklyCount,
+                            monthlyFrequency: monthlyCount,
                             showWeeklyFrequency: true,
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RiskDetailScreen(
-                                  risk: risk,
-                                  onRiskDeleted: widget.onRefresh,
-                                ),
+                                builder: (_) {
+                                  final severity = RiskLogicEngine.evaluateEscalatedSeverity(risk, widget.risks);
+                                  final weekly = RiskLogicEngine().getWeeklyFrequency(risk, widget.risks);
+                                  final monthly = RiskLogicEngine().getMonthlyFrequency(risk, widget.risks);
+                                  return RiskDetailScreen(
+                                    severity: severity,
+                                    weeklyFrequency: weekly,
+                                    monthlyFrequency: monthly,
+                                    risk: risk,
+                                    onRiskDeleted: widget.onRefresh,
+                                  );
+                                },
                               ),
                             ),
                           );

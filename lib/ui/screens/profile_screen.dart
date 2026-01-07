@@ -4,6 +4,7 @@ import 'package:everyday_risk_analyzer/ui/widgets/default_appbar.dart';
 import 'package:everyday_risk_analyzer/ui/widgets/setting_item.dart';
 import 'package:flutter/material.dart';
 import 'package:everyday_risk_analyzer/ui/theme/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserProfile profile;
@@ -28,6 +29,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _currentProfile = widget.profile;
+  }
+
+  Future<void> _signOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SplashScreen(onThemeChange: widget.onThemeChange),
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -74,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-      
+
                 // Name
                 Text(
                   _currentProfile.name,
@@ -87,21 +101,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-      
+
                 // Email
                 Text(
                   _currentProfile.email,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
-      
+
                 // Member Since
                 Text(
                   'Member since ${_currentProfile.createdAt.day}/${_currentProfile.createdAt.month}/${_currentProfile.createdAt.year}',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 20),
-      
+
                 // Edit Profile Button
                 ElevatedButton.icon(
                   onPressed: () => () {
@@ -125,7 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 30),
-      
+
           // Settings Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -140,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 12),
-      
+
           // Privacy & Security
           SettingItem(
             icon: Icons.security,
@@ -150,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _showSnackBar('Privacy settings coming soon!');
             },
           ),
-      
+
           // Appearance / Theme
           SettingItem(
             icon: Icons.color_lens,
@@ -161,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _showSnackBar('Theme changed!');
             },
           ),
-      
+
           // Language
           SettingItem(
             icon: Icons.language,
@@ -171,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _showSnackBar('Language settings coming soon!');
             },
           ),
-      
+
           // Help & Support
           SettingItem(
             icon: Icons.help,
@@ -181,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _showSnackBar('Help section coming soon!');
             },
           ),
-      
+
           // About
           SettingItem(
             icon: Icons.info,
@@ -191,24 +205,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _showSnackBar('About page coming soon!');
             },
           ),
-      
+
           // Sign Out
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SplashScreen(onThemeChange: widget.onThemeChange),
-                  ),
-                  (route) => false, // remove all previous routes
-                );
+                _signOut();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

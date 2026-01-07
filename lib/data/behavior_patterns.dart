@@ -4,7 +4,6 @@ const List<BehaviorPattern> behaviorPatterns = [
   BehaviorPattern(
     code: 'MEAL_SKIPPING',
     category: 'Health',
-    baseWeight: 2,
     keywords: [
       'skipped breakfast',
       'missed lunch',
@@ -14,12 +13,12 @@ const List<BehaviorPattern> behaviorPatterns = [
       'ate nothing',
       'no food today',
       'starving',
+      'didn\'t eat'
     ],
   ),
   BehaviorPattern(
     code: 'SLEEP_DEPRIVATION',
     category: 'Health',
-    baseWeight: 3,
     keywords: [
       'didn\'t sleep',
       'awake all night',
@@ -29,13 +28,12 @@ const List<BehaviorPattern> behaviorPatterns = [
       'no rest',
       'insomnia',
       'couldn\'t sleep',
-      'sleep deprived',
+      'no sleep',
     ],
   ),
   BehaviorPattern(
     code: 'OVERSPENDING',
     category: 'Finance',
-    baseWeight: 3,
     keywords: [
       'overspent money',
       'too much shopping',
@@ -51,7 +49,6 @@ const List<BehaviorPattern> behaviorPatterns = [
   BehaviorPattern(
     code: 'UNSAFE_BEHAVIOR',
     category: 'Safety',
-    baseWeight: 4,
     keywords: [
       'driving without helmet',
       'no seatbelt',
@@ -68,7 +65,6 @@ const List<BehaviorPattern> behaviorPatterns = [
   BehaviorPattern(
     code: 'MENTAL_STRESS',
     category: 'Health',
-    baseWeight: 2,
     keywords: [
       'feeling stressed',
       'anxiety attack',

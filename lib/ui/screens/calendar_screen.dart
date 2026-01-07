@@ -10,7 +10,11 @@ class CalendarScreen extends StatefulWidget {
   final List<RiskEntry> risks;
   final VoidCallback onRefresh;
 
-  const CalendarScreen({super.key, required this.risks, required this.onRefresh});
+  const CalendarScreen({
+    super.key,
+    required this.risks,
+    required this.onRefresh,
+  });
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -40,16 +44,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
         )
         .toList();
 
-    DateTime startOfWeek = currentMonth.subtract(Duration(days: currentMonth.weekday - 1));
+    DateTime startOfWeek = currentMonth.subtract(
+      Duration(days: currentMonth.weekday - 1),
+    );
     DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     final weekRisks = widget.risks.where((r) {
       return r.date.isAtSameMomentAs(startOfWeek) ||
-            r.date.isAtSameMomentAs(endOfWeek) ||
-            (r.date.isAfter(startOfWeek) && r.date.isBefore(endOfWeek));
+          r.date.isAtSameMomentAs(endOfWeek) ||
+          (r.date.isAfter(startOfWeek) && r.date.isBefore(endOfWeek));
     }).toList();
 
-    final displayedRisks = currentView == CalendarView.month ? monthRisks : weekRisks;
+    final displayedRisks = currentView == CalendarView.month
+        ? monthRisks
+        : weekRisks;
 
     return Scaffold(
       appBar: DefaultAppBar(),
@@ -64,9 +72,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 icon: Icon(Icons.chevron_left),
                 onPressed: () => setState(() {
                   if (currentView == CalendarView.month) {
-                    currentMonth = DateTime(currentMonth.year, currentMonth.month - 1);
+                    currentMonth = DateTime(
+                      currentMonth.year,
+                      currentMonth.month - 1,
+                    );
                   } else {
-                    currentMonth = currentMonth.subtract(const Duration(days: 7));
+                    currentMonth = currentMonth.subtract(
+                      const Duration(days: 7),
+                    );
                   }
                 }),
               ),
@@ -74,14 +87,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 currentView == CalendarView.month
                     ? '${_monthName(currentMonth.month)} ${currentMonth.year}'
                     : '${_monthName(startOfWeek.month)} ${startOfWeek.day} - '
-                      '${_monthName(endOfWeek.month)} ${endOfWeek.day}, ${endOfWeek.year}',
+                          '${_monthName(endOfWeek.month)} ${endOfWeek.day}, ${endOfWeek.year}',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               IconButton(
                 icon: Icon(Icons.chevron_right),
                 onPressed: () => setState(() {
                   if (currentView == CalendarView.month) {
-                    currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
+                    currentMonth = DateTime(
+                      currentMonth.year,
+                      currentMonth.month + 1,
+                    );
                   } else {
                     currentMonth = currentMonth.add(const Duration(days: 7));
                   }
@@ -89,7 +105,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ],
           ),
-          SizedBox(height: 12,),
+          SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -106,13 +122,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
           SizedBox(height: 16),
-          currentView == CalendarView.month ? _buildCalendar() : _buildWeekView(),
+          currentView == CalendarView.month
+              ? _buildCalendar()
+              : _buildWeekView(),
           SizedBox(height: 30),
           Text(
             currentView == CalendarView.month
                 ? "Risks for ${_monthName(currentMonth.month)} (${monthRisks.length})"
                 : "Risks for ${_monthName(startOfWeek.month)} ${startOfWeek.day} - "
-                  "${_monthName(endOfWeek.month)} ${endOfWeek.day} (${weekRisks.length})",
+                      "${_monthName(endOfWeek.month)} ${endOfWeek.day} (${weekRisks.length})",
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           SizedBox(height: 16),
@@ -133,20 +151,43 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             )
           else
-          ...displayedRisks.map(
-            (risk) => RiskCard(
-              risk: risk,
-              showWeeklyFrequency: currentView == CalendarView.week, 
-              showMonthlyFrequency: currentView == CalendarView.month,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      RiskDetailScreen(risk: risk, onRiskDeleted: widget.onRefresh),
+            ...displayedRisks.map((risk) {
+              final computedSeverity =
+                  RiskLogicEngine.evaluateEscalatedSeverity(risk, widget.risks);
+              final weeklyCount = RiskLogicEngine().getWeeklyFrequency(
+                risk,
+                widget.risks,
+              );
+              final monthlyCount = RiskLogicEngine().getMonthlyFrequency(
+                risk,
+                widget.risks,
+              );
+              return RiskCard(
+                risk: risk,
+                severity: computedSeverity,
+                weeklyFrequency: weeklyCount,
+                monthlyFrequency: monthlyCount,
+                showWeeklyFrequency: currentView == CalendarView.week,
+                showMonthlyFrequency: currentView == CalendarView.month,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) {
+                      final severity = RiskLogicEngine.evaluateEscalatedSeverity(risk, widget.risks);
+                      final weekly = RiskLogicEngine().getWeeklyFrequency(risk, widget.risks);
+                      final monthly = RiskLogicEngine().getMonthlyFrequency(risk, widget.risks);
+                      return RiskDetailScreen(
+                        severity: severity,
+                        weeklyFrequency: weekly,
+                        monthlyFrequency: monthly,
+                        risk: risk,
+                        onRiskDeleted: widget.onRefresh,
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-          ),
+              );
+            }),
         ],
       ),
     );
@@ -169,10 +210,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Center(
           child: Text(
             day,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
           ),
         ),
       );
@@ -279,24 +317,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
             SizedBox(height: 16),
             Expanded(
               child: ListView(
-                children: dayRisks
-                    .map(
-                      (risk) => RiskCard(
-                        risk: risk,
-                        showWeeklyFrequency: currentView == CalendarView.week, 
-                        showMonthlyFrequency: currentView == CalendarView.month,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => RiskDetailScreen(
-                              risk: risk,
-                              onRiskDeleted: widget.onRefresh,
-                            ),
-                          ),
-                        ),
+                children: dayRisks.map((risk) {
+                  final computedSeverity =
+                      RiskLogicEngine.evaluateEscalatedSeverity(
+                        risk,
+                        widget.risks,
+                      );
+                  final weeklyCount = RiskLogicEngine().getWeeklyFrequency(
+                    risk,
+                    widget.risks,
+                  );
+                  final monthlyCount = RiskLogicEngine().getMonthlyFrequency(
+                    risk,
+                    widget.risks,
+                  );
+                  return RiskCard(
+                    risk: risk,
+                    severity: computedSeverity,
+                    weeklyFrequency: weeklyCount,
+                    monthlyFrequency: monthlyCount,
+                    showWeeklyFrequency: currentView == CalendarView.week,
+                    showMonthlyFrequency: currentView == CalendarView.month,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) {
+                          final severity = RiskLogicEngine.evaluateEscalatedSeverity(risk, widget.risks);
+                          final weekly = RiskLogicEngine().getWeeklyFrequency(risk, widget.risks);
+                          final monthly = RiskLogicEngine().getMonthlyFrequency(risk, widget.risks);
+                          return RiskDetailScreen(
+                            severity: severity,
+                            weeklyFrequency: weekly,
+                            monthlyFrequency: monthly,
+                            risk: risk,
+                            onRiskDeleted: widget.onRefresh,
+                          );
+                        },
                       ),
-                    )
-                    .toList(),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -331,41 +391,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildWeekView() {
-    final now = DateTime(currentMonth.year, currentMonth.month, currentMonth.day);
+    final now = DateTime(
+      currentMonth.year,
+      currentMonth.month,
+      currentMonth.day,
+    );
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
 
     List<Widget> days = List.generate(7, (index) {
       final date = startOfWeek.add(Duration(days: index));
 
-      final dayRisks = widget.risks.where((r) =>
-          r.date.year == date.year &&
-          r.date.month == date.month &&
-          r.date.day == date.day).toList();
+      final dayRisks = widget.risks
+          .where(
+            (r) =>
+                r.date.year == date.year &&
+                r.date.month == date.month &&
+                r.date.day == date.day,
+          )
+          .toList();
 
       return GestureDetector(
-        onTap: dayRisks.isNotEmpty
-            ? () => _showDayRisks(context, date)
-            : null,
+        onTap: dayRisks.isNotEmpty ? () => _showDayRisks(context, date) : null,
         child: Container(
           decoration: BoxDecoration(
+            color: dayRisks.isNotEmpty
+                ? (Theme.of(context).brightness == Brightness.dark
+                      ? Color(0xFF1a2332)
+                      : Color(0xFFe3f2fd))
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
               color: dayRisks.isNotEmpty
-                  ? (Theme.of(context).brightness == Brightness.dark
-                        ? Color(0xFF1a2332)
-                        : Color(0xFFe3f2fd))
+                  ? AppTheme.accentColor.withValues(alpha: .5)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: dayRisks.isNotEmpty
-                    ? AppTheme.accentColor.withValues(alpha: .5)
-                    : Colors.transparent,
-              ),
             ),
+          ),
           padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index],
+                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 6),

@@ -244,19 +244,7 @@ class _AddRiskDialogState extends State<AddRiskDialog> {
       ),
     );
   }
-
-  Color _getSeverityColor(String severity) {
-    if (severity == 'High') return AppTheme.highRiskColor;
-    if (severity == 'Medium') return AppTheme.mediumRiskColor;
-    return AppTheme.lowRiskColor;
-  }
-
-  IconData _getSeverityIcon(String severity) {
-    if (severity == 'High') return Icons.dangerous;
-    if (severity == 'Medium') return Icons.warning;
-    return Icons.info;
-  }
-
+  
   @override
   void dispose() {
     titleController.dispose();

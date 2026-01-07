@@ -6,6 +6,9 @@ class RiskCard extends StatelessWidget {
   final RiskEntry risk;
   final bool showWeeklyFrequency;
   final bool showMonthlyFrequency;
+  final String severity; // non-nullable
+  final int weeklyFrequency;
+  final int monthlyFrequency;
   final VoidCallback? onTap;
 
   const RiskCard({
@@ -13,12 +16,15 @@ class RiskCard extends StatelessWidget {
     required this.risk,
     this.showMonthlyFrequency = false,
     this.showWeeklyFrequency = false,
+    required this.weeklyFrequency,   
+    required this.monthlyFrequency, 
+    required this.severity,
     this.onTap,
   });
 
   Color _getSeverityColor() {
-    if (risk.severity == 'High') return AppTheme.highRiskColor;
-    if (risk.severity == 'Medium') return AppTheme.mediumRiskColor;
+    if (severity == 'High') return AppTheme.highRiskColor;
+    if (severity == 'Medium') return AppTheme.mediumRiskColor;
     return AppTheme.lowRiskColor;
   }
 
@@ -50,10 +56,10 @@ class RiskCard extends StatelessWidget {
     String frequencyText = risk.category; 
     if (showWeeklyFrequency) 
     { 
-      frequencyText += ' • W:${risk.frequency}'; 
+      frequencyText += ' • W:$weeklyFrequency';
     } 
     if (showMonthlyFrequency) { 
-      frequencyText += ' • M:${risk.frequency}'; 
+      frequencyText += ' • M:$monthlyFrequency';
     }
     return GestureDetector(
       onTap: onTap,
@@ -110,7 +116,7 @@ class RiskCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    risk.severity,
+                    severity,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,

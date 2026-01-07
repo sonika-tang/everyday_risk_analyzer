@@ -3,7 +3,6 @@ import 'package:everyday_risk_analyzer/models/risk.dart';
 import 'package:everyday_risk_analyzer/data/behavior_patterns.dart';
 
 class RiskLogicEngine {
-
   // Filter by month
   static List<RiskEntry> filterByMonth(
     List<RiskEntry> risks,
@@ -14,15 +13,11 @@ class RiskLogicEngine {
         .where((r) => r.date.year == year && r.date.month == month)
         .toList();
   }
-  
+
   static String calculateRiskFor(List<RiskEntry> risks) {
     if (risks.isEmpty) return 'None';
 
-    Map<String, int> categoryImpact = {
-      'Health': 0,
-      'Finance': 0,
-      'Safety': 0,
-    };
+    Map<String, int> categoryImpact = {'Health': 0, 'Finance': 0, 'Safety': 0};
 
     for (var risk in risks) {
       final severity = SeverityCalculator.calculateSeverity(
@@ -60,9 +55,11 @@ class RiskLogicEngine {
     // Count similar behaviors instead of exact titles
     int similarCount = allRisks.where((r) {
       String text = ('${r.title} ${r.description}').toLowerCase();
-      return behaviorPatterns.any((pattern) =>
-          pattern.code == behaviorCode &&
-          pattern.keywords.any((kw) => text.contains(kw)));
+      return behaviorPatterns.any(
+        (pattern) =>
+            pattern.code == behaviorCode &&
+            pattern.keywords.any((kw) => text.contains(kw)),
+      );
     }).length;
 
     final baseSeverity = SeverityCalculator.calculateSeverity(
@@ -91,90 +88,16 @@ class RiskLogicEngine {
   }
 
   // Algorithm 2: Behavioral pattern recognition - detect clusters and anomalies
-  static Map<String, dynamic> detectBehavioralPatterns(List<RiskEntry> risks) {
-    Map<String, int> weeklyFrequency = {};
-    Map<String, int> monthlyFrequency = {};
-    Map<String, List<RiskEntry>> riskClusters = {
-      'Health': [],
-      'Safety': [],
-      'Finance': [],
-    };
-    List<String> anomalies = [];
+  static String detectBehavioralPatterns(RiskEntry risk) {
+    String combined = ('${risk.title} ${risk.description}').toLowerCase();
 
-    DateTime now = DateTime.now();
-
-    // --- Weekly boundaries (current calendar week: Monday–Sunday) ---
-    DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
-    DateTime weekEnd = weekStart.add(const Duration(days: 6));
-
-    // --- Monthly boundaries (current calendar month) ---
-    DateTime monthStart = DateTime(now.year, now.month, 1);
-    DateTime monthEnd = DateTime(now.year, now.month + 1, 1)
-        .subtract(const Duration(seconds: 1));
-
-    // Filter weekly and monthly risks
-    List<RiskEntry> weeklyRisks = risks.where((r) =>
-      r.date.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
-      r.date.isBefore(weekEnd.add(const Duration(days: 1)))
-    ).toList();
-
-    List<RiskEntry> monthlyRisks = risks.where((r) =>
-      r.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
-      r.date.isBefore(monthEnd.add(const Duration(seconds: 1)))
-    ).toList();
-
-    // --- Weekly frequency ---
-    for (var risk in weeklyRisks) {
-      String combined = ('${risk.title} ${risk.description}').toLowerCase();
-      String behaviorCode = 'UNCLASSIFIED';
-      for (final pattern in behaviorPatterns) {
-        if (pattern.keywords.any((kw) => combined.contains(kw))) {
-          behaviorCode = pattern.code;
-          break;
-        }
+    for (final pattern in behaviorPatterns) {
+      if (pattern.keywords.any((kw) => combined.contains(kw))) {
+        return pattern.code;
       }
-      weeklyFrequency[behaviorCode] = (weeklyFrequency[behaviorCode] ?? 0) + 1;
-      riskClusters[risk.category]?.add(risk);
     }
 
-    // --- Monthly frequency ---
-    for (var risk in monthlyRisks) {
-      String combined = ('${risk.title} ${risk.description}').toLowerCase();
-      String behaviorCode = 'UNCLASSIFIED';
-      for (final pattern in behaviorPatterns) {
-        if (pattern.keywords.any((kw) => combined.contains(kw))) {
-          behaviorCode = pattern.code;
-          break;
-        }
-      }
-      monthlyFrequency[behaviorCode] = (monthlyFrequency[behaviorCode] ?? 0) + 1;
-    }
-
-    // --- Anomaly detection ---
-    weeklyFrequency.forEach((code, count) {
-      if (count > 5) anomalies.add('Weekly anomaly: $code repeated $count times');
-    });
-    monthlyFrequency.forEach((code, count) {
-      if (count > 10) anomalies.add('Monthly anomaly: $code repeated $count times');
-    });
-
-    // --- Cluster detection (weekly clusters) ---
-    if ((riskClusters['Health']?.length ?? 0) > 3) {
-      anomalies.add('Health Cluster: ${riskClusters['Health']?.length} health risks this week');
-    }
-    if ((riskClusters['Safety']?.length ?? 0) > 3) {
-      anomalies.add('Safety Cluster: ${riskClusters['Safety']?.length} safety risks this week');
-    }
-    if ((riskClusters['Finance']?.length ?? 0) > 3) {
-      anomalies.add('Finance Cluster: ${riskClusters['Finance']?.length} finance risks this week');
-    }
-
-    return {
-      'weeklyFrequency': weeklyFrequency,
-      'monthlyFrequency': monthlyFrequency,
-      'clusters': riskClusters,
-      'anomalies': anomalies,
-    };
+    return 'UNCLASSIFIED';
   }
 
   // Algorithm 3: Calculate overall risk score (0-100)
@@ -198,28 +121,33 @@ class RiskLogicEngine {
   }
 
   // Algorithm 4: Compare last week vs this week risk frequencies
-  static Map<String, dynamic> compareCategoryFrequencies(List<RiskEntry> risks) {
+  static Map<String, dynamic> compareCategoryFrequencies(
+    List<RiskEntry> risks,
+  ) {
     DateTime now = DateTime.now();
 
-    // --- Define week boundaries ---
-    DateTime thisWeekStart = now.subtract(Duration(days: now.weekday - 1));
-    DateTime thisWeekEnd = thisWeekStart.add(const Duration(days: 6));
+    //Define week boundaries 
+    DateTime thisWeekStart = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1)); 
+    DateTime thisWeekEnd = thisWeekStart.add(Duration(days: 6)); 
 
     DateTime lastWeekStart = thisWeekStart.subtract(const Duration(days: 7));
     DateTime lastWeekEnd = thisWeekStart.subtract(const Duration(days: 1));
 
-    // --- Separate risks ---
-    List<RiskEntry> thisWeekRisks = risks.where((r) =>
-      r.date.isAfter(thisWeekStart.subtract(const Duration(seconds: 1))) &&
-      r.date.isBefore(thisWeekEnd.add(const Duration(days: 1)))
-    ).toList();
+    // Separate risks 
+    DateTime dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
-    List<RiskEntry> lastWeekRisks = risks.where((r) =>
-      r.date.isAfter(lastWeekStart.subtract(const Duration(seconds: 1))) &&
-      r.date.isBefore(lastWeekEnd.add(const Duration(days: 1)))
-    ).toList();
+    List<RiskEntry> thisWeekRisks = risks
+        .where((r) =>
+            !dateOnly(r.date).isBefore(thisWeekStart) &&
+            !dateOnly(r.date).isAfter(thisWeekEnd))
+        .toList();
 
-    // --- Count by category ---
+    List<RiskEntry> lastWeekRisks = risks
+        .where((r) =>
+            !dateOnly(r.date).isBefore(lastWeekStart) &&
+            !dateOnly(r.date).isAfter(lastWeekEnd))
+        .toList();
+    // Count by category 
     Map<String, int> thisWeekCounts = {
       'Health': thisWeekRisks.where((r) => r.category == 'Health').length,
       'Safety': thisWeekRisks.where((r) => r.category == 'Safety').length,
@@ -232,7 +160,7 @@ class RiskLogicEngine {
       'Finance': lastWeekRisks.where((r) => r.category == 'Finance').length,
     };
 
-    // --- Build comparison ---
+    // Build comparison 
     Map<String, String> comparison = {};
     for (var category in ['Health', 'Safety', 'Finance']) {
       int last = lastWeekCounts[category] ?? 0;
@@ -242,7 +170,8 @@ class RiskLogicEngine {
       if (diff > 0) {
         comparison[category] = '↑ Increased by $diff (from $last to $current)';
       } else if (diff < 0) {
-        comparison[category] = '↓ Decreased by ${diff.abs()} (from $last to $current)';
+        comparison[category] =
+            '↓ Decreased by ${diff.abs()} (from $last to $current)';
       } else {
         comparison[category] = '→ No change ($current)';
       }
@@ -254,7 +183,6 @@ class RiskLogicEngine {
       'comparison': comparison,
     };
   }
-
 
   // Weekly summary
   static Map<String, int> calculateWeeklySummary(
@@ -268,19 +196,14 @@ class RiskLogicEngine {
     int safety = 0;
 
     for (var risk in risks) {
-      if (!risk.date.isBefore(weekStart) &&
-          !risk.date.isAfter(weekEnd)) {
+      if (!risk.date.isBefore(weekStart) && !risk.date.isAfter(weekEnd)) {
         if (risk.category == 'Health') health++;
         if (risk.category == 'Finance') finance++;
         if (risk.category == 'Safety') safety++;
       }
     }
 
-    return {
-      'Health': health,
-      'Finance': finance,
-      'Safety': safety,
-    };
+    return {'Health': health, 'Finance': finance, 'Safety': safety};
   }
 
   // Calculate overall risks base on the score
@@ -301,41 +224,53 @@ class RiskLogicEngine {
         .toList();
 
     return {
-      'high': catRisks.where((r) =>
-        SeverityCalculator.calculateSeverity(
-          r.title,
-          r.description,
-          r.category,
-          controlLevel: r.controlLevel,
-          urgency: r.urgency,
-          reason: r.reason,
-        ).label == 'High'
-      ).length,
-      'medium': catRisks.where((r) =>
-        SeverityCalculator.calculateSeverity(
-          r.title,
-          r.description,
-          r.category,
-          controlLevel: r.controlLevel,
-          urgency: r.urgency,
-          reason: r.reason,
-        ).label == 'Medium'
-      ).length,
-      'low': catRisks.where((r) =>
-        SeverityCalculator.calculateSeverity(
-          r.title,
-          r.description,
-          r.category,
-          controlLevel: r.controlLevel,
-          urgency: r.urgency,
-          reason: r.reason,
-        ).label == 'Low'
-      ).length,
+      'high': catRisks
+          .where(
+            (r) =>
+                SeverityCalculator.calculateSeverity(
+                  r.title,
+                  r.description,
+                  r.category,
+                  controlLevel: r.controlLevel,
+                  urgency: r.urgency,
+                  reason: r.reason,
+                ).label ==
+                'High',
+          )
+          .length,
+      'medium': catRisks
+          .where(
+            (r) =>
+                SeverityCalculator.calculateSeverity(
+                  r.title,
+                  r.description,
+                  r.category,
+                  controlLevel: r.controlLevel,
+                  urgency: r.urgency,
+                  reason: r.reason,
+                ).label ==
+                'Medium',
+          )
+          .length,
+      'low': catRisks
+          .where(
+            (r) =>
+                SeverityCalculator.calculateSeverity(
+                  r.title,
+                  r.description,
+                  r.category,
+                  controlLevel: r.controlLevel,
+                  urgency: r.urgency,
+                  reason: r.reason,
+                ).label ==
+                'Low',
+          )
+          .length,
     };
   }
 
   // Get recent risks
-  static List<RiskEntry> getRecentRisks(List<RiskEntry> risks, {int days = 8}) {
+  static List<RiskEntry> getRecentRisks(List<RiskEntry> risks, {int days = 7}) {
     DateTime cutoff = DateTime.now().subtract(Duration(days: days));
     return risks.where((r) => r.date.isAfter(cutoff)).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -363,23 +298,37 @@ class RiskLogicEngine {
 
   // Algorithm 6: Monthly and weekly trend analysis
   int getWeeklyFrequency(RiskEntry risk, List<RiskEntry> allRisks) {
-    DateTime now = DateTime.now();
-    DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
-    DateTime weekEnd = weekStart.add(const Duration(days: 6));
+    final riskDate = risk.date;
 
-    return allRisks.where((r) =>
-      r.date.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
-      r.date.isBefore(weekEnd.add(const Duration(days: 1))) &&
-      r.title.toLowerCase() == risk.title.toLowerCase()
-    ).length;
+    final weekStart = riskDate.subtract(
+      Duration(days: riskDate.weekday - 1),
+    );
+    final weekEnd = weekStart.add(const Duration(days: 6));
+
+    final targetCode = RiskLogicEngine.detectBehavioralPatterns(risk);
+
+    return allRisks.where((r) {
+      final code = RiskLogicEngine.detectBehavioralPatterns(r);
+      return r.date.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+            r.date.isBefore(weekEnd.add(const Duration(days: 1))) &&
+            code == targetCode;
+    }).length;
   }
 
   int getMonthlyFrequency(RiskEntry risk, List<RiskEntry> allRisks) {
-    DateTime now = DateTime.now();
-    return allRisks.where((r) =>
-      r.date.year == now.year &&
-      r.date.month == now.month &&
-      r.title.toLowerCase() == risk.title.toLowerCase()
-    ).length;
+    final riskDate = risk.date;
+
+    final monthStart = DateTime(riskDate.year, riskDate.month, 1);
+    final monthEnd = DateTime(riskDate.year, riskDate.month + 1, 1)
+        .subtract(const Duration(seconds: 1));
+
+    final targetCode = RiskLogicEngine.detectBehavioralPatterns(risk);
+
+    return allRisks.where((r) {
+      final code = RiskLogicEngine.detectBehavioralPatterns(r);
+      return r.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
+            r.date.isBefore(monthEnd.add(const Duration(seconds: 1))) &&
+            code == targetCode;
+    }).length;
   }
 }
